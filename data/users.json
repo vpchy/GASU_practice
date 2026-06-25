@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "username": "admin",
+    "email": "admin@architblog.com",
+    "password": "admin123",
+    "role": "admin"
+  },
+  {
+    "id": 2,
+    "username": "architect_ivan",
+    "email": "ivan@architblog.com",
+    "password": "pass123",
+    "role": "user"
+  }
+]

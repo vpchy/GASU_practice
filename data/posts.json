@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "title": "Модернизм в архитектуре",
+    "content": "Модернизм стал революцией в архитектуре 20 века...",
+    "author_id": 2,
+    "image": "https://example.com/modernism.jpg",
+    "created_at": "2026-06-20T10:00:00Z",
+    "likes": 45
+  },
+  {
+    "id": 2,
+    "title": "Сталинский ампир",
+    "content": "Величественный стиль советской архитектуры...",
+    "author_id": 2,
+    "image": "https://example.com/stalin.jpg",
+    "created_at": "2026-06-22T14:30:00Z",
+    "likes": 78
+  }
+]
