@@ -6,7 +6,7 @@
     "author_id": 2,
     "image": "https://example.com/modernism.jpg",
     "created_at": "2026-06-20T10:00:00Z",
-    "likes": 45
+    "likes": 0
   },
   {
     "id": 2,
@@ -15,6 +15,6 @@
     "author_id": 2,
     "image": "https://example.com/stalin.jpg",
     "created_at": "2026-06-22T14:30:00Z",
-    "likes": 78
+    "likes": 0
   }
 ]
