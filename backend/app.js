@@ -98,3 +98,58 @@ app.get("/users", (req, res) => {
 app.listen(3000, () => {
     console.log("Сервер архитектурного блога запущен: http://localhost:3000");
 });
+
+
+let users = [
+    {
+        login: "admin",
+        password: "123"
+    }
+];
+
+
+app.post("/register", (req,res) =>{ 
+    if(req.body.login && req.body.password){
+        let exists = false;
+
+        for (let i = 0; i < users.length; i++)
+        {
+            if(req.body.login == users[i].login && req.body.password == users[i].password){
+                exists = true;
+                
+            }
+        }
+
+        if(exists)
+        {
+            console.log("Аккаунт уже существует. Войдите.");
+            res.sendStatus(403);
+        }else{
+            users.push( {login: req.body.login, password: req.body.password})
+            res.sendStatus(200);
+        }
+            
+}})
+
+
+
+app.post("/login", (req, res) =>{
+    if(req.body.login && req.body.password){
+        let found = false;
+        for (let i = 0; i<users.length; i++) {
+            if(req.body.login == users[i].login) {
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            console.log("Аккаунт найден");
+            res.sendStatus(200);
+        } else {
+            console.log("Аккаунт не найден. Зарегистрируйтесь.");
+            res.sendStatus(403);
+        }     
+        }else{
+            res.sendStatus(404);
+        }
+    })
