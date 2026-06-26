@@ -1,0 +1,28 @@
+{
+  "type": "module",
+  "name": "gasu_practice",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "vite frontend --host 127.0.0.1",
+    "dev": "vite frontend --host 127.0.0.1",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vpchy/GASU_practice.git"
+  },
+  "author": "KirillAstashov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vpchy/GASU_practice/issues"
+  },
+  "homepage": "https://github.com/vpchy/GASU_practice#readme",
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "vite": "^8.1.0"
+  }
+}
