@@ -6,7 +6,7 @@ const createAndLoginButton = document.getElementById("createAndLogin");
 const container = document.querySelector(".container");
 const loginForm = document.getElementById("loginForm");
 const registerForm = document.getElementById("registerForm");
-
+//hello milana
 const slider = document.querySelector(".tab-slider");
 
 function updateContainerHeight() {
