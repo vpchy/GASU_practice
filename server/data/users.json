@@ -1,12 +1,12 @@
 [
     {
-        "id": 1,
-        "login": "ivan",
-        "password": "123"
+        "id": 7,
+        "login": "kirill",
+        "password": "$2b$10$nUrf3n/4NdxjizyKiZa0geWRkxTho6vBwhBqWo730knst.XN8l.ya"
     },
     {
         "id": 2,
-        "login": "kirill123",
-        "password": "1123423"
+        "login": "kirill43958345",
+        "password": "$2b$10$.eYOBrkhMFLq7OD/TxtfP.2zp2/WLtx2RijpAl1.ArpTt1UkGdZDK"
     }
 ]

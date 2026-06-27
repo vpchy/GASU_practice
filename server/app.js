@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import fs from "fs";
+import bcrypt from 'bcrypt';
 
 
 
@@ -15,40 +16,7 @@ app.get("/", (req, res) => {
 });
 
 
-app.post("/login", (req, res) => {
-    const users = JSON.parse(
-        fs.readFileSync("./data/users.json", "utf-8")
-    );
-    let flag = false;
-
-    if (!req.body.login || !req.body.password) {
-        return res.json({
-            success: false,
-            message: "Введите логин и пароль"});
-        }
-    
-    for (let i = 0; i < users.length; i++) {
-        if ((users[i].login === req.body.login) && (users[i].password === req.body.password)) {
-            flag = true;
-            break;
-        }
-    }
-    if (flag) {
-        return res.json({
-            success: true,
-            message: "Вход успешен."   
-        });
-    } else {
-        return res.json({
-            success: false,
-            message: "Неправильный логин или пароль."
-        });
-    }
-});
-
-
-app.post("/register", (req, res) => {
-
+app.post("/login", async (req, res) => {
     const users = JSON.parse(
         fs.readFileSync("./data/users.json", "utf-8")
     );
@@ -60,6 +28,46 @@ app.post("/register", (req, res) => {
         });
     }
 
+    const user = users.find(user => user.login === req.body.login);
+
+    if (!user) {
+        return res.json({
+            success: false,
+            message: "Неправильный логин или пароль."
+        });
+    }
+
+    const ok = await bcrypt.compare(req.body.password, user.password);
+
+    if (!ok) {
+        return res.json({
+            success: false,
+            message: "Неправильный логин или пароль."
+        });
+    }
+
+    return res.json({
+        success: true,
+        message: "Вход успешен."
+    });
+});
+
+
+app.post("/register", async (req, res) => {
+
+    const users = JSON.parse(
+        fs.readFileSync("./data/users.json", "utf-8")
+    );
+    
+    if (!req.body.login || !req.body.password) {
+        return res.json({
+            success: false,
+            message: "Введите логин и пароль"
+        });
+    }
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    
     for (let i = 0; i < users.length; i++) {
         if (users[i].login === req.body.login) {
             return res.json({
@@ -72,7 +80,7 @@ app.post("/register", (req, res) => {
     const newUser = {
         id: users.length + 1,
         login: req.body.login,
-        password: req.body.password
+        password: hashedPassword
     };
 
     users.push(newUser);

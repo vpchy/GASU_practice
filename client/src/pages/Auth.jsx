@@ -1,0 +1,162 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginUser, registerUser } from "../api/auth";
+
+function Auth() {
+  const [isRegister, setIsRegister] = useState(false);
+  const [registerLogin, setRegisterLogin] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [loginLogin, setLoginLogin] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const container = document.querySelector(".container");
+    if (container) {
+      container.style.height = `${container.scrollHeight}px`;
+    }
+  }, [isRegister]);
+
+  async function register() {
+    try {
+      const data = await registerUser(registerLogin, registerPassword);
+      alert(data.message);
+      if (data.success) {
+        setRegisterLogin("");
+        setRegisterPassword("");
+        setIsRegister(false);
+      }
+    } catch (error) {
+      alert("Ошибка сервера или сети");
+      console.error(error);
+    }
+  }
+
+  async function login() {
+    try {
+      const data = await loginUser(loginLogin, loginPassword);
+      alert(data.message);
+      if (data.success) {
+        localStorage.setItem("user", loginLogin);
+        navigate("/main");
+      }
+    } catch (error) {
+      alert("Ошибка сервера или сети");
+      console.error(error);
+    }
+  }
+
+  function showLogin() {
+    setIsRegister(false);
+  }
+
+  function showRegister() {
+    setIsRegister(true);
+  }
+
+  return (
+    <>
+      <div className="logo">
+        <h1>
+          🏛️Arch<span>Space</span>
+        </h1>
+        <p>Архитектурное пространство</p>
+      </div>
+
+      <div className="tabs">
+        <div
+          className="tab-slider"
+          style={{
+            transform: isRegister ? "translateX(100%)" : "translateX(0)"
+          }}
+        ></div>
+
+        <button
+          className={isRegister ? "tab" : "tab active"}
+          type="button"
+          onClick={showLogin}
+        >
+          Вход
+        </button>
+
+        <button
+          className={isRegister ? "tab active" : "tab"}
+          type="button"
+          onClick={showRegister}
+        >
+          Регистрация
+        </button>
+      </div>
+
+      <div className="forms">
+        <form className={isRegister ? "form" : "form active"}>
+          <div className="form-group">
+            <label>Email или номер телефона</label>
+            <input
+              type="email"
+              placeholder="Введите почту или номер телефона"
+              value={loginLogin}
+              onChange={(e) => setLoginLogin(e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Пароль</label>
+            <input
+              type="password"
+              placeholder="Пароль"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+            />
+          </div>
+
+          <button type="button" className="btn btn-primary" onClick={login}>
+            Войти
+          </button>
+        </form>
+
+        <form className={isRegister ? "form active" : "form"}>
+          <div className="form-group">
+            <label>Email или номер телефона</label>
+            <input
+              type="email"
+              placeholder="Введите почту или номер телефона"
+              value={registerLogin}
+              onChange={(e) => setRegisterLogin(e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Пароль</label>
+            <input
+              type="password"
+              placeholder="Придумайте пароль"
+              value={registerPassword}
+              onChange={(e) => setRegisterPassword(e.target.value)}
+            />
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={register}
+          >
+            Создать аккаунт
+          </button>
+        </form>
+      </div>
+
+      <button
+        type="button"
+        className="btn btn-secondary"
+        style={{ display: isRegister ? "none" : "block" }}
+        onClick={showRegister}
+      >
+        Нет аккаунта? Создать
+      </button>
+    </>
+  );
+}
+
+export default Auth;
