@@ -46,11 +46,11 @@ function Auth({ onClose }) {
   async function login() {
     try {
       const data = await loginUser(loginLogin, loginPassword);
-      alert(data.message);
+      alert(data.message || "Вход выполнен");
       if (data.success) {
         localStorage.setItem("token", data.token);
         navigate("/main");
-    }
+      }
     } catch (error) {
       alert("Ошибка сервера или сети");
       console.error(error);

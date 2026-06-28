@@ -85,8 +85,9 @@ app.post("/login", async (req, res) => {
     );
 
     return res.json({
-    success: true,
-    token
+        success: true,
+        message: "Вход выполнен",
+        token
     });
 });
 

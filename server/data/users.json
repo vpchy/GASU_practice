@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "login": "1234",
+        "password": "$2b$10$ivuz4sYYrzf77kvWWxluTeyhQn/sYtAlVGZ/U7JDA1ywUQhIBGw.m"
+    },
+    {
+        "id": 2,
+        "login": "12345",
+        "password": "$2b$10$n46LuEaQlN.gVk.lpnDriOyFbRsHAcomIQcBsSkwb6q60ZnYTjo.O"
+    },
+    {
+        "id": 3,
+        "login": "123456",
+        "password": "$2b$10$lWdNz/oGj/JZsPy0yM/Do.3JpENRE0LL2RLtb6nZk9bWqpXzWxrey"
+    }
+]
