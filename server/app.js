@@ -3,7 +3,7 @@ import cors from "cors";
 import fs from "fs";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
-
+import {isValidEmail, isStrongPassword, isValidPhone} from './validators.js';
 
 const JWT_SECRET = "super_secret_key_123"; 
 
@@ -91,34 +91,66 @@ app.post("/login", async (req, res) => {
     });
 });
 
-
 app.post("/register", async (req, res) => {
-
     const users = JSON.parse(
         fs.readFileSync("./data/users.json", "utf-8")
     );
-    
-    if (!req.body.login || !req.body.password) {
+
+    const { login, password } = req.body;
+
+    if (!login || !password) {
         return res.json({
             success: false,
-            message: "Введите логин и пароль"
+            message: "Пожалуйста, введите логин и пароль."
         });
     }
 
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    
-    for (let i = 0; i < users.length; i++) {
-        if (users[i].login === req.body.login) {
+    if (login.includes('@')) {
+        // Если есть @, значит пользователь вводил email
+        if (!isValidEmail(login)) {
             return res.json({
                 success: false,
-                message: "Такой пользователь уже существует"
+                message: "Некорректный формат email. Проверьте, что указали домен (например, @mail.ru)."
             });
         }
+    } else if (/^\+?[\d\s\-()]+$/.test(login)) {
+        // Если только цифры и знаки телефона — это попытка ввести номер
+        if (!isValidPhone(login)) {
+            return res.json({
+                success: false,
+                message: "Неверный формат телефона. Номер должен содержать от 10 до 15 цифр (например, +79991234567)."
+            });
+        }
+    } else {
+        // Любой другой текст без @ (например, "kirill89123")
+        return res.json({
+            success: false,
+            message: "Введенный логин не похож на телефон или email.\nДля email добавьте '@', а для телефона используйте только цифры."
+        });
+    
     }
+
+    if (!isStrongPassword(password)) {
+        return res.json({
+            success: false,
+            message: "Недостаточно надежный пароль!\nЧтобы продолжить, пожалуйста, убедитесь, что ваш пароль:\n* Состоит минимум из 6 символов\n* Содержит хотя бы 1 букву\n* Содержит хотя бы 1 цифру"
+        });
+    }
+
+    const exists = users.find(u => u.login === login);
+
+    if (exists) {
+        return res.json({
+            success: false,
+            message: "Пользователь уже существует"
+        });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = {
         id: users.length + 1,
-        login: req.body.login,
+        login,
         password: hashedPassword
     };
 
@@ -133,7 +165,6 @@ app.post("/register", async (req, res) => {
         success: true,
         message: "Регистрация успешна"
     });
-
 });
 
 
