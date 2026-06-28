@@ -1,170 +1,270 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navigation from "../components/Navigation.jsx";
+import Navigation from "../components/Navigation";
+import Auth from "./Auth";
+import "../styles/main.css";
 
 function Main() {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (!localStorage.getItem("user")) {
-      navigate("/");
+    const [posts] = useState([
+        {
+            id: 1,
+            author: "Иван Иванов",
+            time: "2 часа назад",
+            text:
+                "Новый проект жилого комплекса в стиле неоклассицизм. Вдохновлялся работами Андрея Воронихина. Важно сохранить баланс между современностью и историческим контекстом.",
+            likes: 24,
+            comments: [
+                {
+                    id: 1,
+                    author: "Елена Фролова",
+                    text: "Потрясающе! Особенно понравилось решение с фасадом.",
+                    time: "1 час назад"
+                }
+            ]
+        },
+        {
+            id: 2,
+            author: "Анна Смирнова",
+            time: "Вчера",
+            text:
+                "Интересно наблюдать, как современные материалы позволяют сохранить исторический облик зданий и одновременно значительно увеличить срок их службы.",
+            likes: 51,
+            comments: [
+                {
+                    id: 1,
+                    author: "Александр",
+                    text: "Очень интересная статья!",
+                    time: "20 минут назад"
+                }
+            ]
+        }
+    ]);
+
+    useEffect(() => {
+        if (!localStorage.getItem("user")) {
+            navigate("/");
+        }
+    }, [navigate]);
+
+    function openAuthModal() {
+        setIsAuthModalOpen(true);
     }
-  }, [navigate]);
 
-  return (
-    <>
-      <header className="header">
-        <div className="header-container">
-          <a href="/main" className="logo-link">
-            <span className="logo-icon">🏛️</span>
-            <span className="logo-text">Arch<span>Space</span></span>
-          </a>
+    function closeAuthModal() {
+        setIsAuthModalOpen(false);
+    }
 
-          <div className="header-search">
-            <input
-              type="text"
-              placeholder="Поиск постов, людей..."
-              className="search-input"
-            />
-          </div>
+    return (
+        <>
+            <header className="header">
 
-          <div className="header-actions">
-            <button className="icon-btn" type="button">🔔</button>
-            <div className="header-profile">
-              <span className="username">Мой профиль</span>
-              <span className="arrow-down">▼</span>
-            </div>
-            <button 
-              className="icon-btn" 
-              type="button"
-              onClick={() => {
-                localStorage.removeItem("user");
-                navigate("/");
-              }}
-              style={{ marginLeft: "10px", backgroundColor: "#f0f0f0" }}
-            >
-              🚪 Выход
-            </button>
-          </div>
-        </div>
-      </header>
+                <div className="header-container">
 
-      <main className="main-content">
-        <aside className="sidebar">
-          <Navigation />
-        </aside>
+                    <a
+                        href="#"
+                        className="logo-link"
+                        onClick={(e) => e.preventDefault()}
+                    >
+                        <span className="logo-icon">
+                            🏛️
+                        </span>
 
-        <section className="feed">
-          <button className="create-post-btn" type="button">
-            Написать пост
-          </button>
+                        <span className="logo-text">
+                            Arch<span>Space</span>
+                        </span>
+                    </a>
 
-          <article className="post">
-            <div className="post-header">
-              <div className="post-author">
-                <span className="post-author-name">Иван Иванов</span>
-                <span className="post-time">2 часа назад</span>
-              </div>
-              <button className="post-more" type="button">•••</button>
-            </div>
+                    <div className="header-search">
 
-            <div className="post-content">
-              <p>
-                Новый проект жилого комплекса в стиле неоклассицизм. Вдохновлялся
-                работами Андрея Воронихина. Важно сохранить баланс между
-                современностью и историческим контекстом.
-              </p>
-            </div>
+                        <input
+                            className="search-input"
+                            type="text"
+                            placeholder="Поиск постов..."
+                        />
 
-            <div className="post-actions">
-              <button className="action-btn like-btn" type="button">
-                ❤️ <span>24</span>
-              </button>
-              <button className="action-btn comment-btn" type="button">
-                💬 <span>7</span>
-              </button>
-              <button className="action-btn repost-btn" type="button">
-                🔄 <span>3</span>
-              </button>
-            </div>
+                    </div>
 
-            <div className="post-comments">
-              <div className="comment">
-                <div className="comment-body">
-                  <div className="comment-author">Елена Фролова</div>
-                  <div className="comment-text">
-                    Потрясающе! Особенно понравилось решение с фасадом.
-                  </div>
-                  <div className="comment-time">1 час назад</div>
+                    <div className="header-actions">
+
+                        <button
+                            className="icon-btn"
+                            type="button"
+                        >
+                            🔔
+                        </button>
+
+                        <button
+                            className="header-profile"
+                            type="button"
+                            onClick={openAuthModal}
+                        >
+                            <span className="username">
+                                Мой профиль
+                            </span>
+
+                        </button>
+
+                        <button
+                            className="icon-btn"
+                            type="button"
+                            onClick={openAuthModal}
+                        >
+                            🚪
+                        </button>
+
+                    </div>
+
                 </div>
-                <button className="comment-like" type="button">❤️ 2</button>
-              </div>
 
-              <div className="comment">
-                <div className="comment-body">
-                  <div className="comment-author">Дмитрий Фадеев</div>
-                  <div className="comment-text">
-                    А какие материалы использовали для отделки?
-                  </div>
-                  <div className="comment-time">34 минуты назад</div>
+            </header>
+
+            {isAuthModalOpen && (
+                <div className="auth-modal-overlay" onClick={closeAuthModal}>
+                    <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
+                        <Auth onClose={closeAuthModal} />
+                    </div>
                 </div>
-                <button className="comment-like" type="button">❤️ 1</button>
-              </div>
+            )}
 
-              <div className="comment-form">
-                <input
-                  type="text"
-                  placeholder="Написать комментарий..."
-                  className="comment-input"
-                />
-                <button className="comment-send" type="button">➤</button>
-              </div>
-            </div>
-          </article>
+            <main className="main-content">
 
-          <article className="post">
-            <div className="post-header">
-              <div className="post-author">
-                <span className="post-author-name">Виктория Соболева</span>
-                <span className="post-time">5 часов назад</span>
-              </div>
-              <button className="post-more" type="button">•••</button>
-            </div>
+                <aside className="sidebar">
 
-            <div className="post-content">
-              <p>
-                Реставрация доходного дома начала XX века. Удалось восстановить
-                оригинальные витражи и лепнину. Фото процесса прилагаю.
-              </p>
-            </div>
+                    <Navigation onOpenAuth={openAuthModal} />
 
-            <div className="post-actions">
-              <button className="action-btn like-btn" type="button">
-                ❤️ <span>18</span>
-              </button>
-              <button className="action-btn comment-btn" type="button">
-                💬 <span>5</span>
-              </button>
-              <button className="action-btn repost-btn" type="button">
-                🔄 <span>1</span>
-              </button>
-            </div>
+                </aside>
 
-            <div className="post-comments">
-              <div className="comment-form">
-                <input
-                  type="text"
-                  placeholder="Написать комментарий..."
-                  className="comment-input"
-                />
-                <button className="comment-send" type="button">➤</button>
-              </div>
-            </div>
-          </article>
-        </section>
-      </main>
+                <section className="feed">
+
+                    <button
+                        className="create-post-btn"
+                        type="button"
+                    >
+                        + Создать публикацию
+                    </button>
+                                        {posts.map((post) => (
+
+                        <article
+                            key={post.id}
+                            className="post"
+                        >
+
+                            <div className="post-header">
+
+                                <div className="post-author">
+
+                                    <span className="post-author-name">
+                                        {post.author}
+                                    </span>
+
+                                    <span className="post-time">
+                                        {post.time}
+                                    </span>
+
+                                </div>
+
+                                <button
+                                    className="post-more"
+                                    type="button"
+                                >
+                                    •••
+                                </button>
+
+                            </div>
+
+                            <div className="post-content">
+
+                                <p>
+                                    {post.text}
+                                </p>
+
+                            </div>
+
+                            <div className="post-actions">
+
+                                <button
+                                    className="action-btn"
+                                    type="button"
+                                >
+                                    ❤️ {post.likes}
+                                </button>
+
+                                <button
+                                    className="action-btn"
+                                    type="button"
+                                >
+                                    💬 {post.comments.length}
+                                </button>
+
+                                <button
+                                    className="action-btn"
+                                    type="button"
+                                >
+                                    🔄
+                                </button>
+
+                            </div>
+
+                            <div className="post-comments">
+
+                                {post.comments.map((comment) => (
+
+                                    <div
+                                        key={comment.id}
+                                        className="comment"
+                                    >
+
+                                        <div className="comment-body">
+
+                                            <div className="comment-author">
+                                                {comment.author}
+                                            </div>
+
+                                            <div className="comment-text">
+                                                {comment.text}
+                                            </div>
+
+                                            <div className="comment-time">
+                                                {comment.time}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                ))}
+
+                                <div className="comment-input">
+
+                                    <input
+                                        className="comment-field"
+                                        type="text"
+                                        placeholder="Написать комментарий..."
+                                    />
+
+                                    <button
+                                        className="comment-send-btn"
+                                        type="button"
+                                    >
+                                        Отправить
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    ))}            
+                    </section>
+
+        </main>
+
     </>
-  );
+);
 }
 
 export default Main;

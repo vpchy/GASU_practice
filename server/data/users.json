@@ -8,5 +8,10 @@
         "id": 2,
         "login": "kirill43958345",
         "password": "$2b$10$.eYOBrkhMFLq7OD/TxtfP.2zp2/WLtx2RijpAl1.ArpTt1UkGdZDK"
+    },
+    {
+        "id": 3,
+        "login": "Kirill123123",
+        "password": "$2b$10$DL1Vq5MJIRiUTnQEGG5alOnwZW9QIcuK0EaC.caNuI74hKROR2DOa"
     }
 ]
