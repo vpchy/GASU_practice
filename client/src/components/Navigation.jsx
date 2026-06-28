@@ -21,8 +21,9 @@ function Navigation() {
     const safeActiveIndex = activeIndex >= 0 ? activeIndex : 0;
 
     const handleLogout = () => {
+        localStorage.removeItem("token");
         localStorage.removeItem("user");
-        navigate("/");
+        navigate("/main");
     };
 
 

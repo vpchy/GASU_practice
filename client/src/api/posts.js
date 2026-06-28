@@ -5,7 +5,7 @@ export async function getPosts(token) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `BEARER ${token}`
+      "Authorization": `Bearer ${token}`
     },
   });
 

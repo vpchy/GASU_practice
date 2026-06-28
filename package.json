@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "node ./node_modules/vite/bin/vite.js client --host 127.0.0.1 --open",
-    "dev": "node ./node_modules/vite/bin/vite.js client --host 127.0.0.1",
+    "start": "cd client && npm run start",
+    "dev": "cd client && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

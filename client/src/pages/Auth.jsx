@@ -49,6 +49,9 @@ function Auth({ onClose }) {
       alert(data.message || "Вход выполнен");
       if (data.success) {
         localStorage.setItem("token", data.token);
+        if (onClose) {
+          onClose();
+        }
         navigate("/main");
       }
     } catch (error) {
