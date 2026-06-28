@@ -293,6 +293,7 @@ app.get("/posts/:id/comments", (req, res) => {
             return {
                 id: comment.id,
                 text: comment.text,
+                time: comment.time,
                 author: user ? {
                     id: user.id,
                     login: user.login
@@ -303,34 +304,48 @@ app.get("/posts/:id/comments", (req, res) => {
     return res.json(postComments);
 });
 
-app.post("/posts/:id/comments", (req, res) =>{
+app.post("/posts/:id/comments", authMiddleware, (req, res) => {
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
     const comments = JSON.parse(fs.readFileSync("./data/comments.json", "utf-8"));
-    
-    for(let i=0; i< posts.length; i++){
-        if (Number(req.params.id)=== posts[i].id){
-            
-            const newComment = {
-                id: comments.length + 1,
-                postId: Number(req.params.id),
-                authorId: req.body.authorId,
-                text: req.body.text
-            };
-            comments.push(newComment);
 
-            fs.writeFileSync("./data/comments.json", JSON.stringify(comments, null, 4));
-            return res.json({
-                success: true,
-                message: "Комментарий отправлен.",
-            })
+    const postId = Number(req.params.id);
 
-        }
+    const post = posts.find(p => p.id === postId);
+
+    if (!post) {
+        return res.json({
+            success: false,
+            message: "Пост не найден"
+        });
     }
-    return res.json({
-        success: false,
-        message: "Пост не найден",
-    })
-})
+
+    if (!req.body.text) {
+        return res.json({
+            success: false,
+            message: "Комментарий пустой"
+        });
+    }
+
+    const newComment = {
+        id: comments.length + 1,
+        postId,
+        authorId: req.user.id,
+        text: req.body.text,
+        time: new Date().toISOString()
+    };
+
+    comments.push(newComment);
+
+    fs.writeFileSync(
+        "./data/comments.json",
+        JSON.stringify(comments, null, 4)
+    );
+
+    res.json({
+        success: true,
+        message: "Комментарий добавлен"
+    });
+});
 
 app.get("/users/:id", (req, res) => {
     const users = JSON.parse(fs.readFileSync("./data/users.json", "utf-8"));
