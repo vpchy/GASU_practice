@@ -2,13 +2,42 @@ import express from "express";
 import cors from "cors";
 import fs from "fs";
 import bcrypt from 'bcrypt';
+import jwt from "jsonwebtoken";
 
 
+const JWT_SECRET = "super_secret_key_123"; 
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+function authMiddleware(req, res, next) {
+    const authHeader = req.headers.authorization;
+    
+
+    if(!authHeader){
+        return res.status(401).json({
+            success: false,
+            message: "не получили токен."
+        });
+    };
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+
+        next();
+        
+    } catch (error) {
+        return res.status(401).json({
+            success: false,
+            message: "Недействительный токен"
+        });
+    }
+
+}
 
 
 app.get("/", (req, res) => {
@@ -46,9 +75,18 @@ app.post("/login", async (req, res) => {
         });
     }
 
+    const token = jwt.sign(
+        {
+            id: user.id,
+            login: user.login
+        },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+    );
+
     return res.json({
-        success: true,
-        message: "Вход успешен."
+    success: true,
+    token
     });
 });
 
@@ -100,27 +138,10 @@ app.post("/register", async (req, res) => {
 
 app.get("/posts", (req, res) => {
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
-    const users = JSON.parse(fs.readFileSync("./data/users.json", "utf-8"));
-
-    const result = posts.map(post => {
-        const author = users.find(u => u.id === post.authorId);
-
-        return {
-            id: post.id,
-            title: post.title,
-            text: post.text,
-            likes: post.likes,
-            author: author ? {
-                id: author.id,
-                login: author.login
-            } : null
-        };
-    });
-
-    return res.json(result);
+    return res.json(posts);
 });
 
-app.post("/posts", (req, res) => {
+app.post("/posts", authMiddleware, (req, res) => {
     const posts = JSON.parse(
         fs.readFileSync("./data/posts.json", "utf-8")
     );
@@ -133,7 +154,7 @@ app.post("/posts", (req, res) => {
     }
     const newPost = {
         id: posts.length + 1,
-        authorId: req.body.authorId,
+        authorId: req.user.id,
         title: req.body.title,
         text: req.body.text,
         likes: 0

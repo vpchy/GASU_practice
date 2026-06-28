@@ -3,48 +3,44 @@ import { useNavigate } from "react-router-dom";
 import Navigation from "../components/Navigation";
 import Auth from "./Auth";
 import "../styles/main.css";
-
+/*ДОБАВИЛ ПОСТЫ
+ТЕПЕРЬ ИХ МОЖЕТ НАПИСАТЬ ТОЛЬКО АВТОРИЗИРОВАННЫЙ ПОЛЬЗОВАТЕЛЬ
+САМИ ПОСТЫ ЗАГРУЖАЮТСЯ ИЗ ФАЙЛА server/data/posts.json 
+ВСЕ ПОДВЯЗАННО К API и JSON 
+ТЕПЕРЬ НАДО ДОБАВИТЬ САМУ ВОЗМОЖНОСТЬ НАПИСАТЬ ПОСТ */
 function Main() {
     const navigate = useNavigate();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-    const [posts] = useState([
-        {
-            id: 1,
-            author: "Иван Иванов",
-            time: "2 часа назад",
-            text:
-                "Новый проект жилого комплекса в стиле неоклассицизм. Вдохновлялся работами Андрея Воронихина. Важно сохранить баланс между современностью и историческим контекстом.",
-            likes: 24,
-            comments: [
-                {
-                    id: 1,
-                    author: "Елена Фролова",
-                    text: "Потрясающе! Особенно понравилось решение с фасадом.",
-                    time: "1 час назад"
+    const [posts, setPosts] = useState([]);
+    /*спросить че это у чата гпт */
+    useEffect(() => {
+    async function loadPosts() {
+        try {
+            const token = localStorage.getItem("token");
+
+            const response = await fetch("http://localhost:3000/posts", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
                 }
-            ]
-        },
-        {
-            id: 2,
-            author: "Анна Смирнова",
-            time: "Вчера",
-            text:
-                "Интересно наблюдать, как современные материалы позволяют сохранить исторический облик зданий и одновременно значительно увеличить срок их службы.",
-            likes: 51,
-            comments: [
-                {
-                    id: 1,
-                    author: "Александр",
-                    text: "Очень интересная статья!",
-                    time: "20 минут назад"
-                }
-            ]
+            });
+
+            const data = await response.json();
+
+            setPosts(data);
+
+        } catch (error) {
+            console.error("Ошибка сети при загрузке постов:", error);
         }
-    ]);
+    }
+
+    loadPosts();
+}, []);
 
     useEffect(() => {
-        if (!localStorage.getItem("user")) {
+        if (!localStorage.getItem("token")) {
             navigate("/");
         }
     }, [navigate]);

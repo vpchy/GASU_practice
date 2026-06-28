@@ -42,15 +42,15 @@ function Auth({ onClose }) {
       console.error(error);
     }
   }
-
+  /*изменил функцию логин 28.06 ТЕПЕРЬ ОНА ОБРАБАТЫВАЕТ */
   async function login() {
     try {
       const data = await loginUser(loginLogin, loginPassword);
       alert(data.message);
       if (data.success) {
-        localStorage.setItem("user", loginLogin);
+        localStorage.setItem("token", data.token);
         navigate("/main");
-      }
+    }
     } catch (error) {
       alert("Ошибка сервера или сети");
       console.error(error);
