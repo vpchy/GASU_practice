@@ -178,7 +178,57 @@ app.post("/register", async (req, res) => {
 
 app.get("/posts", (req, res) => {
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
-    return res.json(posts);
+    const users = JSON.parse(fs.readFileSync("./data/users.json", "utf-8"));
+    const comments = JSON.parse(fs.readFileSync("./data/comments.json", "utf-8"));
+
+    const result = [];
+
+    for (const post of posts) {
+
+        let author = "Неизвестный пользователь";
+
+        for (const user of users) {
+            if (user.id === post.authorId) {
+                author = user.login;
+                break;
+            }
+        }
+
+        const postComments = [];
+
+        for (const comment of comments) {
+
+            if (comment.postId !== post.id) continue;
+
+            let commentAuthor = "Неизвестный пользователь";
+
+            for (const user of users) {
+                if (user.id === comment.authorId) {
+                    commentAuthor = user.login;
+                    break;
+                }
+            }
+
+            postComments.push({
+                id: comment.id,
+                author: commentAuthor,
+                text: comment.text,
+                time: comment.time
+            });
+        }
+
+        result.push({
+            id: post.id,
+            author,
+            title: post.title,
+            text: post.text,
+            time: post.time,
+            likes: post.likes,
+            comments: postComments
+        });
+    }
+
+    res.json(result);
 });
 
 app.post("/posts", authMiddleware, (req, res) => {
@@ -197,20 +247,81 @@ app.post("/posts", authMiddleware, (req, res) => {
         authorId: req.user.id,
         title: req.body.title,
         text: req.body.text,
+        time: new Date().toISOString(),
         likes: 0
     };
 
     posts.push(newPost);
 
     fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
-
+    console.log("USER FROM TOKEN:", req.user);
+    console.log("NEW POST:", newPost);
     res.json({
         
         success: true,
         message: "Пост отправлен",
+        post: newPost
         
     });
 
+})
+
+app.get("/my-posts", authMiddleware, (req, res) => {
+    const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
+    const users = JSON.parse(fs.readFileSync("./data/users.json", "utf-8"));
+    const comments = JSON.parse(fs.readFileSync("./data/comments.json", "utf-8"));
+
+    const result = [];
+
+    for (const post of posts) {
+
+        let author = "Неизвестный пользователь";
+
+        for (const user of users) {
+            if (user.id === post.authorId) {
+                author = user.login;
+                break;
+            }
+        }
+
+        const postComments = [];
+
+        for (const comment of comments) {
+
+            if (comment.postId !== post.id) continue;
+
+            let commentAuthor = "Неизвестный пользователь";
+
+            for (const user of users) {
+                if (user.id === comment.authorId) {
+                    commentAuthor = user.login;
+                    break;
+                }
+            }
+        
+            
+            postComments.push({
+                id: comment.id,
+                author: commentAuthor,
+                text: comment.text,
+                time: comment.time
+            });
+        }
+        if (post.authorId !== req.user.id) {
+            continue;
+        }
+        result.push({
+            id: post.id,
+            author,
+            title: post.title,
+            text: post.text,
+            time: post.time,
+            likes: post.likes,
+            comments: postComments
+        });
+    }
+
+    res.json(result);
 })
 
 app.put("/posts/:id", authMiddleware, (req, res) => {
@@ -256,7 +367,7 @@ app.delete("/posts/:id", authMiddleware, (req, res) =>{
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
 
     const post = posts.find(c => c.id === Number(req.params.id));
-    
+
     if (!post){
         return res.json({
             success: false,
@@ -274,7 +385,22 @@ app.delete("/posts/:id", authMiddleware, (req, res) =>{
     const index = posts.findIndex(p => p.id === Number(req.params.id));
     posts.splice(index, 1);
     fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
+    //коменты тож удаляем
+    const comments = JSON.parse(
+        fs.readFileSync("./data/comments.json", "utf-8")
+    );
+    const filteredComments = [];
 
+    for (const comment of comments) {
+        if (comment.postId !== Number(req.params.id)) {
+            filteredComments.push(comment);
+        }
+    }
+
+    fs.writeFileSync(
+        "./data/comments.json",
+        JSON.stringify(filteredComments, null, 4)
+    );
     return res.json({
         success: true,
         message: "Пост удалён"
@@ -308,29 +434,30 @@ app.get("/posts/:id/comments", (req, res) => {
     const comments = JSON.parse(fs.readFileSync("./data/comments.json", "utf-8"));
     const users = JSON.parse(fs.readFileSync("./data/users.json", "utf-8"));
 
-    const usersMap = new Map();
-
-    for (const user of users) {
-        usersMap.set(user.id, user);
-    }
+    const postComments = [];
     const postId = Number(req.params.id);
-    const postComments = comments
-        .filter(c => c.postId === postId)
-        .map(comment => {
-            const user = usersMap.get(comment.authorId);
+    for (const comment of comments) {
+        
+        if (comment.postId !== postId) continue;
 
-            return {
-                id: comment.id,
-                text: comment.text,
-                time: comment.time,
-                author: user ? {
-                    id: user.id,
-                    login: user.login
-                } : null
-            };
+        let author = "Неизвестный пользователь";
+
+        for (const user of users) {
+            if (user.id === comment.authorId) {
+                author = user.login;
+                break;
+            }
+        }
+
+        postComments.push({
+            id: comment.id,
+            author,
+            text: comment.text,
+            time: comment.time
         });
+    }
 
-    return res.json(postComments);
+    res.json(postComments);
 });
 
 app.post("/posts/:id/comments", authMiddleware, (req, res) => {

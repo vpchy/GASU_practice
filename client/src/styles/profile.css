@@ -272,6 +272,22 @@ body {
     margin-bottom: 12px;
 }
 
+.post-input {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  overflow: hidden;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.post-input.open {
+  max-height: 600px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 .action-btn {
     background: none;
     border: none;
@@ -373,6 +389,37 @@ body {
 
 .comment-send:hover {
     background: var(--red-dark);
+}
+
+.comment-form-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 10px 12px;
+
+  background: #fff;
+  border: 2px solid var(--red-border);
+  border-radius: 50px;
+
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.comment-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.comment-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-attach-wrapper,
+.comment-send-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 /* ===========================

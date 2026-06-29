@@ -118,15 +118,12 @@ body{
     background:rgba(129,35,35,.12);
 }
 
-.header-profile{
-    border: none;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0;
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
 }
 
 .auth-modal-overlay {
@@ -240,17 +237,26 @@ body{
 }
 
 .nav-item{
-    position:relative;
-    display:flex;
-    align-items:center;
-    height:48px;
-    padding:0 18px;
-    border-radius:14px;
-    text-decoration:none;
-    color:#444;
-    font-weight:700;
-    transition:color .25s ease, transform .25s ease, background-color .25s ease, letter-spacing .25s ease;
-    will-change:transform, color, letter-spacing;
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 48px;
+    padding: 0 18px;
+    border-radius: 14px;
+
+    border: none;
+    background: transparent;
+
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+
+    text-decoration: none;
+    color: #444;
+    cursor: pointer;
+
+    transition: color .25s ease, transform .25s ease, background-color .25s ease, letter-spacing .25s ease;
+    will-change: transform, color, letter-spacing;
 }
 
 .nav-item:hover{
@@ -402,7 +408,15 @@ body{
 .attach-btn:hover {
     background: rgba(129, 35, 35, 0.05);
 }
+.attach-input {
+    display: none;
+}
 
+.attachment-preview {
+    font-size: 13px;
+    color: var(--red);
+    font-weight: 600;
+}
 /* ===========================
    POSTS
 =========================== */
@@ -553,6 +567,7 @@ body{
     margin-top:18px;
     padding-top:16px;
     border-top:1px solid rgba(129,35,35,.12);
+    flex-wrap: wrap;
 }
 
 .comment-field{
@@ -594,6 +609,32 @@ body{
 .comment-send-btn:hover{
     background:var(--red-dark);
     transform:translateY(-1px);
+}
+
+.comment-attach-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.comment-attach-btn {
+    min-width: 120px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed rgba(129,35,35,.25);
+    border-radius: 14px;
+    background: #fff;
+    color: var(--red);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .25s;
+}
+
+.comment-attach-btn:hover {
+    background: var(--red-bg);
 }
 
 .comment-send-btn:active{
