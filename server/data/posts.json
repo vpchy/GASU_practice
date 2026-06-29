@@ -1,90 +1,34 @@
 [
     {
+        "id": 1,
+        "authorId": 2,
+        "title": "я сосал",
+        "text": " меня ебали",
+        "time": "2026-06-29T16:46:34.515Z",
+        "likes": 20
+    },
+    {
         "id": 2,
         "authorId": 1,
-        "title": "Я ебал рот",
-        "text": "Я думаю неоклассицизм - полная хуета.",
-        "time": "2026-06-29T14:10:46.168Z",
-        "likes": 0
+        "title": "неизвестный пользователь",
+        "text": "заявляю лично, неизвестный пользователь уебан!!!!",
+        "time": "2026-06-29T16:48:00.114Z",
+        "likes": 10
     },
     {
         "id": 3,
         "authorId": 1,
-        "title": "я думаю я сосал меня ебали",
-        "text": "авыфаыфва",
-        "time": "2026-06-29T14:11:03.337Z",
-        "likes": 0
+        "title": "АХАХАХАХА",
+        "text": "АХАХАХА",
+        "time": "2026-06-29T16:48:42.429Z",
+        "likes": 2
     },
     {
         "id": 4,
         "authorId": 1,
-        "title": "fsdfasfdas",
-        "text": "vxcvxzvsxvxzvxzvcxzvcxzvxcvxzcvxczvcx",
-        "time": "2026-06-29T14:13:25.598Z",
-        "likes": 0
-    },
-    {
-        "id": 5,
-        "authorId": 1,
-        "title": "luytyuhj",
-        "text": "lyutfyfhk",
-        "time": "2026-06-29T14:15:09.466Z",
-        "likes": 0
-    },
-    {
-        "id": 6,
-        "authorId": 1,
-        "title": "sadfsaf",
-        "text": "asdfsadf",
-        "time": "2026-06-29T15:21:40.243Z",
-        "likes": 0
-    },
-    {
-        "id": 7,
-        "authorId": 1,
-        "title": "зуйзуйузй",
-        "text": "хуй хуй хуй",
-        "time": "2026-06-29T15:29:31.682Z",
-        "likes": 0
-    },
-    {
-        "id": 8,
-        "authorId": 1,
-        "title": "фываыфва",
-        "text": "ывафыа",
-        "time": "2026-06-29T15:29:39.148Z",
-        "likes": 0
-    },
-    {
-        "id": 9,
-        "authorId": 1,
-        "title": "ыфавыфа",
-        "text": "выафыа",
-        "time": "2026-06-29T15:29:56.847Z",
-        "likes": 0
-    },
-    {
-        "id": 10,
-        "authorId": 1,
-        "title": "[eq[eq[",
-        "text": "]eq[eq[e",
-        "time": "2026-06-29T15:32:43.069Z",
-        "likes": 0
-    },
-    {
-        "id": 11,
-        "authorId": 1,
-        "title": "я ебал",
-        "text": "я ебал",
-        "time": "2026-06-29T15:33:12.592Z",
-        "likes": 0
-    },
-    {
-        "id": 12,
-        "authorId": 2,
-        "title": "[eq",
-        "text": "хуйхухйухйух",
-        "time": "2026-06-29T15:41:31.592Z",
+        "title": "ljlk",
+        "text": "kjhuh",
+        "time": "2026-06-29T16:56:32.542Z",
         "likes": 0
     }
 ]

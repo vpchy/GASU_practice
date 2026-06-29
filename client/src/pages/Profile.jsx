@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import "../styles/main.css";
 import "../styles/profile.css";
+import { getMyPosts as apiGetMyPosts, createPost as apiCreatePost,
+    createComment as apiCreateComment, likePost as apiLikePost } from "../api";
 function Profile() {
     const [posts, setPosts] = useState([]);
     const [showPostForm, setShowPostForm] = useState(false);
@@ -11,23 +13,51 @@ function Profile() {
     const [title, setTitle] = useState("");
     const [text, setText] = useState("");
     
+    const [commentText, setCommentText] = useState({});
+
+    async function likePost(postId) {
+        try {
+            const data = await apiLikePost(postId);
+
+            if (data.success) {
+                setPosts(prev => prev.map(post => post.id === postId
+                            ? { ...post, likes: data.likes } : post
+                    )
+                );
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function sendComment(postId) {
+        const text = commentText[postId];
+
+        if (!text?.trim()) return;
+
+        try {
+            const res = await apiCreateComment(postId, text);
+
+            if (res.success) {
+            setCommentText(prev => ({
+                ...prev,
+                [postId]: ""
+            }));
+
+            await loadPosts(); // обновить профильный feed
+            } else {
+            alert(res.message);
+            };
+        } catch (err) {
+            console.error(err);
+        };
+    };   
 
 
     async function loadPosts() {
         try {
-            const token = localStorage.getItem("token");
-
-            const response = await fetch("http://localhost:3000/my-posts", {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            const data = await response.json();
-        
+            const data = await apiGetMyPosts();
             setPosts(data);
-
         } catch (error) {
             console.error(error);
         }
@@ -39,34 +69,20 @@ function Profile() {
 
 
     async function createPost() {
-    try {
-        const token = localStorage.getItem("token");
+        try {
+            const data = await apiCreatePost({ title, text });
 
-        const response = await fetch("http://localhost:3000/posts", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({
-                title,
-                text
-            })
-        });
+            if (!data.success) return;
 
-        const data = await response.json();
+            setTitle("");
+            setText("");
+            setShowPostForm(false);
+            await loadPosts();
 
-        if (!data.success) return;
-
-        setTitle("");
-        setText("");
-        setShowPostForm(false);
-        await loadPosts();
-
-    } catch (error) {
-        console.error(error);
+        } catch (error) {
+            console.error(error);
+        }
     }
-}
     
     function handlePostFileSelect(event) {
         const file = event.target.files?.[0];
@@ -243,8 +259,8 @@ function Profile() {
                         </div>
 
                         <div className="post-actions">
-                            <button className="action-btn" type="button">
-                                ❤️ {post.likes}
+                            <button className="action-btn" type="button" onClick={() => likePost(post.id)}>
+                                ❤️ {post.likes || 0}
                             </button>
 
                             <button className="action-btn" type="button">
@@ -272,6 +288,13 @@ function Profile() {
                                     className="comment-field"
                                     type="text"
                                     placeholder="Написать комментарий..."
+                                    value={commentText[post.id] || ""}
+                                    onChange={(e) =>
+                                        setCommentText(prev => ({
+                                        ...prev,
+                                        [post.id]: e.target.value
+                                        }))
+                                    }
                                 />
 
                                 <div className="comment-attach-wrapper">
@@ -296,6 +319,7 @@ function Profile() {
                                 <button
                                     className="comment-send-btn"
                                     type="button"
+                                    onClick={() => sendComment(post.id)}
                                 >
                                     Отправить
                                 </button>

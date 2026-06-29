@@ -1,70 +1,85 @@
 import { useEffect, useState } from "react";
 import "../styles/main.css";
+import { getPosts as apiGetPosts, createPost as apiCreatePost,
+  createComment as apiCreateComment, likePost as apiLikePost } from "../api";
 
 function Main() {
   const [posts, setPosts] = useState([]);
   const [showPostForm, setShowPostForm] = useState(false);
-
   // Добавлено только для прикрепления файлов
   const [postAttachmentName, setPostAttachmentName] = useState("");
   const [commentAttachmentNames, setCommentAttachmentNames] = useState({});
-
+  const [commentText, setCommentText] = useState({});
   // для постов
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
 
   async function loadPosts() {
-      try {
-          const token = localStorage.getItem("token");
-
-          const response = await fetch("http://localhost:3000/posts", {
-              headers: {
-                  "Content-Type": "application/json",
-                  ...(token ? { Authorization: `Bearer ${token}` } : {})
-              }
-          });
-
-          const data = await response.json();
-          setPosts(data);
-
-      } catch (error) {
-          console.error(error);
-      }
+    try {
+      const data = await apiGetPosts();
+      setPosts(data);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   useEffect(() => {
       loadPosts();
   }, []);
 
+
+  async function likePost(postId) {
+    try {
+      const data = await apiLikePost(postId);
+
+      if (data.success) {
+        setPosts(prev => prev.map(post => post.id === postId
+                    ? { ...post, likes: data.likes } : post
+            )
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
   async function createPost() {
     try {
-        const token = localStorage.getItem("token");
+      const data = await apiCreatePost({ title, text });
+      alert(data.message);
 
-        const response = await fetch("http://localhost:3000/posts", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          }, body: JSON.stringify({
-            title, text
-          })
-        })
-
-        const data = await response.json();
-
-        alert(data.message);
-
-        if (data.success) {
-            setTitle("");
-            setText("");
-            setShowPostForm(false);
-            await loadPosts();
-        }
-
+      if (data.success) {
+        setTitle("");
+        setText("");
+        setShowPostForm(false);
+        await loadPosts();
+      }
     } catch (error) {
-        console.error(error);
+      console.error(error);
     }
-}
+  }
+
+  async function sendComment(postId) {
+    const text = commentText[postId];
+
+    if (!text?.trim()) return;
+
+    try {
+      const res = await apiCreateComment(postId, text);
+
+      if (res.success) {
+        setCommentText(prev => ({
+          ...prev,
+          [postId]: ""
+        }));
+
+        await loadPosts();
+      } else {
+        alert(res.message);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   // Добавлено только для прикрепления файлов
   function handlePostFileSelect(event) {
@@ -177,8 +192,8 @@ function Main() {
           </div>
 
           <div className="post-actions">
-            <button className="action-btn" type="button">
-              ❤️ {post.likes}
+            <button className="action-btn" type="button" onClick={() => likePost(post.id)}>
+              ❤️ {post.likes || 0}
             </button>
 
             <button className="action-btn" type="button">
@@ -205,6 +220,13 @@ function Main() {
                 className="comment-field"
                 type="text"
                 placeholder="Написать комментарий..."
+                value={commentText[post.id] || ""}
+                onChange={(e) =>
+                setCommentText(prev => ({
+                  ...prev,
+                  [post.id]: e.target.value
+                }))
+              } 
               />
 
               <div className="comment-attach-wrapper">
@@ -229,6 +251,7 @@ function Main() {
               <button
                 className="comment-send-btn"
                 type="button"
+                onClick={() => sendComment(post.id)}
               >
                 Отправить
               </button>

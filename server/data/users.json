@@ -1,12 +1,7 @@
 [
     {
         "id": 1,
-        "login": "test@gmail.com",
-        "password": "$2b$10$6IbLl3q8L1UMyy.CHgdx.eyOOLty0FBpkZ8UZgBFFrIHRIWAatKV."
-    },
-    {
-        "id": 2,
-        "login": "+79051397446",
-        "password": "$2b$10$xDdUG3RsiZpR/Q.ZCjcOVu2gBMagNhaHb2ibW24vaCq/wSnOxnUCa"
+        "login": "kirill8943@gmail.com",
+        "password": "$2b$10$OYLaouzvXo4448TR0HLatuQUEW0wY7qz9pbF2UpFHhPdP3RvQ5dA."
     }
 ]
