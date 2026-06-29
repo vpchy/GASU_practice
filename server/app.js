@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config({ path: "./config/.env" });
+
 import express from "express";
 import cors from "cors";
 import fs from "fs";
@@ -5,7 +8,12 @@ import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
 import {isValidEmail, isStrongPassword, isValidPhone} from './validators.js';
 
-const JWT_SECRET = "super_secret_key_123"; 
+const JWT_SECRET = process.env.JWT_SECRET;
+const PORT = process.env.PORT || 3000;
+
+if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET не задан");
+}
 
 const app = express();
 
@@ -215,30 +223,39 @@ app.put("/posts/:id", authMiddleware, (req, res) => {
         });
     }
 
-    for(let i=0; i< posts.length; i++){
-        if (Number(req.params.id)=== posts[i].id){
-            posts[i].title = req.body.title;
-            posts[i].text = req.body.text;         
+    const post = posts.find(c => c.id === Number(req.params.id));
 
-            fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
-            return res.json({
-                success: true,
-                message: "Пост обновлен",
-            })
-        }
+    if (!post) {
+        return res.json({
+            success: false,
+            message: "Пост не найден",
+        });
     }
-    return res.json({
-        success: false,
-        message: "Пост не найден",
-    })
 
-})
+    // проверка владельца
+    if (post.authorId !== req.user.id) {
+        return res.status(403).json({
+            success: false,
+            message: "Вы не можете редактировать чужой пост"
+        });
+    }
+
+    post.title = req.body.title;
+    post.text = req.body.text;
+
+    fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
+
+    return res.json({
+        success: true,
+        message: "Пост обновлен",
+    });
+});
 
 app.delete("/posts/:id", authMiddleware, (req, res) =>{
 
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
 
-    const post = posts.find(c => c.id == Number(req.params.id));
+    const post = posts.find(c => c.id === Number(req.params.id));
     
     if (!post){
         return res.json({
@@ -247,13 +264,7 @@ app.delete("/posts/:id", authMiddleware, (req, res) =>{
         })
     };
 
-    /* проверяем действително ли удаляет автор поста*/
-    if (post.authorId !== req.user.id) {
-    return res.status(403).json({
-        success: false,
-        message: "Вы не можете редактировать чужой пост"
-        });
-    }
+    // проверяем действително ли удаляет автор поста
     if (post.authorId !== req.user.id) {
     return res.status(403).json({
         success: false,
@@ -271,25 +282,26 @@ app.delete("/posts/:id", authMiddleware, (req, res) =>{
 
 })
 
-app.post("/posts/:id/like", (req, res) => {
+app.post("/posts/:id/like", authMiddleware, (req, res) => {
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
 
-    for(let i=0; i< posts.length; i++){
-        if (Number(req.params.id)=== posts[i].id){
-            posts[i].likes++;
-            fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
-            return res.json({
-                success: true,
-                message: "Пост лайкнут",
-            })
-
-        }
-    }
-    return res.json({
-        success: false,
-        message: "Пост не найден",
-    })
+    const post = posts.find(c => c.id === Number(req.params.id));
     
+    if (!post){
+        return res.json({
+            success: false,
+            message: "Такого поста не существует"
+        })
+    };
+
+    post.likes++;
+
+    fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
+    res.json({
+        success: true,
+        message: "Пост лайкнут",
+        likes: post.likes
+    });
 })
 
 app.get("/posts/:id/comments", (req, res) => {
@@ -325,9 +337,8 @@ app.post("/posts/:id/comments", authMiddleware, (req, res) => {
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
     const comments = JSON.parse(fs.readFileSync("./data/comments.json", "utf-8"));
 
-    const postId = Number(req.params.id);
 
-    const post = posts.find(p => p.id === postId);
+    const post = posts.find(p => p.id === Number(req.params.id));
 
     if (!post) {
         return res.json({
@@ -345,7 +356,7 @@ app.post("/posts/:id/comments", authMiddleware, (req, res) => {
 
     const newComment = {
         id: comments.length + 1,
-        postId,
+        postId: Number(req.params.id),
         authorId: req.user.id,
         text: req.body.text,
         time: new Date().toISOString()
@@ -380,8 +391,6 @@ app.get("/users/:id", (req, res) => {
     return res.json(user);
 })
 
-
-const PORT = 3000;
 
 app.listen(PORT, () => {
     console.log(`Сервер запущен на http://localhost:${PORT}`);

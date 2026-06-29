@@ -8,5 +8,10 @@
         "id": 2,
         "login": "+7989324234432",
         "password": "$2b$10$ZLLn0duIOKytJENfQ.sCe.DrrM5gtKWtZBZ7CvEbgD2EJNnCJVyYe"
+    },
+    {
+        "id": 3,
+        "login": "test@gmail.com",
+        "password": "$2b$10$krKxzfNSEFRcFnJb/rENVuM/.KV2wJqNkdi7IWgy3/N2hT0GzdUV6"
     }
 ]
