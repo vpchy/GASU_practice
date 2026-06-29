@@ -1,9 +1,19 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-function Navigation() {
+function Navigation({ onOpenAuthModal }) {
 
     const location = useLocation();
     const navigate = useNavigate();
+
+    function goToProfile() {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+        navigate("/profile");
+    } else {
+        onOpenAuthModal();
+    }
+}
 
     const menuItems = [
         { label: "Лента", path: "/main", highlight: true },
@@ -23,7 +33,8 @@ function Navigation() {
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        navigate("/main");
+
+        window.location.href = "/main";
     };
 
 
@@ -54,6 +65,18 @@ function Navigation() {
                     }
 
                     const isActive = item.highlight && normalizedPath === item.path;
+
+                    if (item.label === "Мой профиль") {
+                        return (
+                            <button
+                                key={item.label}
+                                className={`nav-item${isActive ? " active" : ""}`}
+                                onClick={goToProfile}
+                            >
+                                {item.label}
+                            </button>
+                        );
+                    }                    
 
                     return (
                         <Link

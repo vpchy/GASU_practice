@@ -6,16 +6,8 @@ import Auth from "../pages/Auth";
 
 function Layout() {
   const location = useLocation();
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const protectedPaths = ["/main", "/profile"];
-
-    if (!token && protectedPaths.includes(location.pathname) && !isAuthModalOpen) {
-      setIsAuthModalOpen(true);
-    }
-  }, [location.pathname, isAuthModalOpen]);
 
   function openAuthModal() {
     setIsAuthModalOpen(true);
@@ -25,21 +17,37 @@ function Layout() {
     setIsAuthModalOpen(false);
   }
 
+  function logout() {
+    localStorage.removeItem("token");
+    setIsAuthModalOpen(false);
+
+    window.location.href = "/main";
+  }
+
   return (
     <>
       {isAuthModalOpen && (
-        <div className="auth-modal-overlay" onClick={closeAuthModal}>
-          <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="auth-modal-overlay"
+          onClick={closeAuthModal}
+        >
+          <div
+            className="auth-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Auth onClose={closeAuthModal} />
           </div>
         </div>
       )}
 
-      <Header onOpenAuthModal={openAuthModal} />
+      <Header
+        onOpenAuthModal={openAuthModal}
+        onLogout={logout}
+      />
 
       <main className="main-content">
         <aside className="sidebar">
-          <Navigation />
+        <Navigation onOpenAuthModal={openAuthModal} />  
         </aside>
 
         <Outlet />

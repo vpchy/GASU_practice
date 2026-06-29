@@ -205,7 +205,7 @@ app.post("/posts", authMiddleware, (req, res) => {
 
 })
 
-app.put("/posts/:id", (req, res) => {
+app.put("/posts/:id", authMiddleware, (req, res) => {
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
 
     if (!req.body.title || !req.body.text) {
@@ -214,7 +214,7 @@ app.put("/posts/:id", (req, res) => {
             message: "Введите заголовок и текст"
         });
     }
-    
+
     for(let i=0; i< posts.length; i++){
         if (Number(req.params.id)=== posts[i].id){
             posts[i].title = req.body.title;
@@ -234,24 +234,41 @@ app.put("/posts/:id", (req, res) => {
 
 })
 
-app.delete("/posts/:id", (req, res) =>{
+app.delete("/posts/:id", authMiddleware, (req, res) =>{
+
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
 
-    for(let i=0; i< posts.length; i++){
-        if (Number(req.params.id)=== posts[i].id){
-            posts.splice(i,1);
-            fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
-            return res.json({
-                success: true,
-                message: "Пост удалён",
-            })
+    const post = posts.find(c => c.id == Number(req.params.id));
+    
+    if (!post){
+        return res.json({
+            success: false,
+            message: "Такого поста не существует"
+        })
+    };
 
-        }
-    }
-    return res.json({
+    /* проверяем действително ли удаляет автор поста*/
+    if (post.authorId !== req.user.id) {
+    return res.status(403).json({
         success: false,
-        message: "Пост не найден",
-    })
+        message: "Вы не можете редактировать чужой пост"
+        });
+    }
+    if (post.authorId !== req.user.id) {
+    return res.status(403).json({
+        success: false,
+        message: "Вы не можете удалять чужой пост"
+        });
+    }
+    const index = posts.findIndex(p => p.id === Number(req.params.id));
+    posts.splice(index, 1);
+    fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
+
+    return res.json({
+        success: true,
+        message: "Пост удалён"
+    });
+
 })
 
 app.post("/posts/:id/like", (req, res) => {

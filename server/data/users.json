@@ -1,3 +1,12 @@
 [
-
+    {
+        "id": 1,
+        "login": "kiril89423@gmai.com",
+        "password": "$2b$10$qaNbt3cVWd672K/TAN3UteubMDOQav2hEMzQ4qXBJJmxfs5rjfFOS"
+    },
+    {
+        "id": 2,
+        "login": "+7989324234432",
+        "password": "$2b$10$ZLLn0duIOKytJENfQ.sCe.DrrM5gtKWtZBZ7CvEbgD2EJNnCJVyYe"
+    }
 ]

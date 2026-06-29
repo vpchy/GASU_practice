@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 
-function Header({ onOpenAuthModal }) {
+function Header({ onOpenAuthModal, onLogout }) {
+  const isAuth = !!localStorage.getItem("token");
+
   return (
     <header className="header">
       <div className="header-container">
@@ -12,7 +14,11 @@ function Header({ onOpenAuthModal }) {
         </Link>
 
         <div className="header-search">
-          <input className="search-input" type="text" placeholder="Поиск постов..." />
+          <input
+            className="search-input"
+            type="text"
+            placeholder="Поиск постов..."
+          />
         </div>
 
         <div className="header-actions">
@@ -20,13 +26,26 @@ function Header({ onOpenAuthModal }) {
             🔔
           </button>
 
-          <button type="button" className="header-profile" onClick={onOpenAuthModal}>
-            <span className="username">Войти/зарегистрироваться</span>
-          </button>
+          {isAuth ? (
+            <Link to="/profile" className="avatar-btn">
+              <img
+                src="/default-avatar.png"
+                alt="Аватар"
+                className="avatar"
+              />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="header-profile"
+              onClick={onOpenAuthModal}
+            >
+              <span className="username">
+                Войти/зарегистрироваться
+              </span>
+            </button>
+          )}
 
-          <button className="icon-btn" type="button">
-            🚪
-          </button>
         </div>
       </div>
     </header>

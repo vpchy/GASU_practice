@@ -52,7 +52,9 @@ function Auth({ onClose }) {
         if (onClose) {
           onClose();
         }
-        navigate("/main");
+      if (onClose) {
+        onClose();
+      }
       }
     } catch (error) {
       alert("Ошибка сервера или сети");
