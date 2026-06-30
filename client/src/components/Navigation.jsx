@@ -17,9 +17,8 @@ function Navigation({ onOpenAuthModal }) {
 
     const menuItems = [
         { label: "Лента", path: "/main", highlight: true },
-        { label: "Интересные факты", path: "/architects", highlight: true },
         { label: "Мой профиль", path: "/profile", highlight: true },
-        { label: "Мои посты", path: "/main", highlight: false },
+        { label: "Интересные факты", path: "/architects", highlight: true },
         { label: "О проекте", path: "/about", highlight: true },
         { label: "Выход", action: "logout" }
     ];

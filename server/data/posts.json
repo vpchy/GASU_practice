@@ -1,14 +1,5 @@
 [
     {
-        "id": 5,
-        "authorId": 1,
-        "title": "раз",
-        "text": "раз",
-        "time": "2026-06-30T09:01:38.165Z",
-        "likes": 0,
-        "likedBy": []
-    },
-    {
         "id": 7,
         "authorId": 1,
         "title": "выафыва",
@@ -66,7 +57,7 @@
         "id": 13,
         "authorId": 1,
         "title": "новый пост сверху",
-        "text": "новый пост сверху",
+        "text": "новый пост сверхуsfda",
         "time": "2026-06-30T09:53:20.703Z",
         "likes": 0,
         "likedBy": []
@@ -74,7 +65,7 @@
     {
         "id": 14,
         "authorId": 1,
-        "title": "бла бла бла",
+        "title": "бла бла блаsfsafsdaf",
         "text": "бла бла бла",
         "time": "2026-06-30T09:55:54.615Z",
         "likes": 0,
@@ -82,10 +73,10 @@
     },
     {
         "id": 15,
-        "authorId": 1,
-        "title": "asdfadsf",
-        "text": "sdfdsafdas",
-        "time": "2026-06-30T10:07:43.593Z",
+        "authorId": 3,
+        "title": "asdfas",
+        "text": "asdfasfdsa",
+        "time": "2026-06-30T15:26:07.942Z",
         "likes": 0,
         "likedBy": []
     }

@@ -14,6 +14,23 @@ function Profile() {
 
     const [posts, setPosts] = useState([]);
     const [showPostForm, setShowPostForm] = useState(false);
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState("success");
+
+    useEffect(() => {
+        if (!message) return;
+
+        const timeout = setTimeout(() => {
+            setMessage("");
+        }, 4500);
+
+        return () => clearTimeout(timeout);
+    }, [message]);
+
+    function showMessage(text, type = "success") {
+        setMessage(text);
+        setMessageType(type);
+    }
 
     // имя прикрепленного файла к публикации
     const [postAttachmentName, setPostAttachmentName] = useState("");
@@ -78,8 +95,14 @@ function Profile() {
     
                 if (data.success) {
                     setPosts(prev => prev.filter(post => post.id !== postId));
+                    showMessage(data.message, "success");
+                } else {
+                    showMessage(data.message || "Не удалось удалить пост", "error");
                 }
-            }catch(error){ console.log(error);}
+            } catch(error) {
+                console.error(error);
+                showMessage("Ошибка сервера при удалении поста", "error");
+            }
         }
     // поставить лайк
     async function likePost(postId) {
@@ -102,11 +125,14 @@ function Profile() {
                             : post
                     )
                 );
-
+                showMessage(data.message, "success");
+            } else {
+                showMessage(data.message || "Не удалось поставить лайк", "error");
             }
 
         } catch (error) {
             console.error(error);
+            showMessage("Ошибка сервера при установке лайка", "error");
         }
 
     }
@@ -133,7 +159,11 @@ function Profile() {
                 });
             }
 
-            if (!data.success) return;
+            if (!data.success) {
+                showMessage(data.message || "Ошибка при сохранении поста", "error");
+                return;
+            }
+            showMessage(data.message, "success");
 
             // очищаем форму
             setTitle("");
@@ -174,17 +204,19 @@ function Profile() {
                     [postId]: ""
                 }));
 
+                showMessage(res.message, "success");
                 // обновляем комментарии
                 await loadPosts();
 
             } else {
 
-                alert(res.message);
+                showMessage(res.message || "Не удалось отправить комментарий", "error");
 
             }
 
         } catch (err) {
             console.error(err);
+            showMessage("Ошибка сервера при отправке комментария", "error");
         }
 
     }
@@ -318,7 +350,11 @@ function Profile() {
                 >
                     + Создать публикацию
                 </button>
-
+                {message && (
+                    <div className={`page-message ${messageType}`}>
+                        {message}
+                    </div>
+                )}
             </div>
 
 

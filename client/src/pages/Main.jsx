@@ -3,6 +3,7 @@ import "../styles/main.css";
 import {
     getPosts as apiGetPosts,
     createPost as apiCreatePost,
+    updatePost as apiUpdatePost,
     createComment as apiCreateComment,
     likePost as apiLikePost,
     deletePost as apiDeletePost
@@ -12,6 +13,24 @@ function Main() {
 
     const [posts, setPosts] = useState([]);
     const [showPostForm, setShowPostForm] = useState(false);
+    const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState("success");
+
+    // уведомление для пользователя
+    useEffect(() => {
+        if (!message) return;
+
+        const timeout = setTimeout(() => {
+            setMessage("");
+        }, 4500);
+
+        return () => clearTimeout(timeout);
+    }, [message]);
+
+    function showMessage(text, type = "success") {
+        setMessage(text);
+        setMessageType(type);
+    }
 
     // имя прикрепленного файла к публикации
     const [postAttachmentName, setPostAttachmentName] = useState("");
@@ -87,8 +106,14 @@ function Main() {
 
             if (data.success) {
                 setPosts(prev => prev.filter(post => post.id !== postId));
+                showMessage(data.message, "success");
+            } else {
+                showMessage(data.message || "Не удалось удалить пост", "error");
             }
-        }catch(error){ console.log(error);}
+        } catch(error) {
+            console.error(error);
+            showMessage("Ошибка сервера при удалении поста", "error");
+        }
     }
     // поставить лайк
     async function likePost(postId) {
@@ -110,12 +135,15 @@ function Main() {
                             : post
                     )
                 );
-
+                showMessage(data.message, "success");
+            } else {
+                showMessage(data.message || "Не удалось поставить лайк", "error");
             }
 
         } catch (error) {
 
             console.error(error);
+            showMessage("Ошибка сервера при установке лайка", "error");
 
         }
 
@@ -143,7 +171,11 @@ function Main() {
                 });
             }
 
-            if (!data.success) return;
+            if (!data.success) {
+                showMessage(data.message || "Ошибка при сохранении поста", "error");
+                return;
+            }
+            showMessage(data.message, "success");
 
             // очищаем форму
             setTitle("");
@@ -185,17 +217,19 @@ function Main() {
                     [postId]: ""
                 }));
 
+                showMessage(res.message, "success");
                 await loadPosts();
 
             } else {
 
-                alert(res.message);
+                showMessage(res.message || "Не удалось отправить комментарий", "error");
 
             }
 
         } catch (err) {
 
             console.error(err);
+            showMessage("Ошибка сервера при отправке комментария", "error");
 
         }
 
@@ -239,6 +273,12 @@ function Main() {
                 + Создать публикацию
             </button>
 
+            {message && (
+                <div className={`page-message ${messageType}`}>
+                    {message}
+                </div>
+            )}
+
 
             {/* форма создания публикации */}
             <div className={`post-input ${showPostForm ? "open" : ""}`}>
@@ -273,7 +313,7 @@ function Main() {
                             type="button"
                             onClick={createPost}
                         >
-                            Опубликовать
+                            {editingPostId ? "Сохранить" : "Опубликовать"}
                         </button>
 
                         {/* закрыть форму */}

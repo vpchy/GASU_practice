@@ -321,7 +321,7 @@ body{
 }
 
 .post-top-row {
-    max-width: 857px;
+    max-width: 693px;
     flex: 1;
     height: 20px;
     padding: 0 10px;
@@ -608,17 +608,19 @@ body{
     align-items:center;
     gap:12px;
     margin-top:18px;
-    padding-top:16px;
-    border-top:1px solid rgba(129,35,35,.12);
+    padding:16px;
+    border:1px solid rgba(129,35,35,.15);
+    border-radius:50px;
     flex-wrap: wrap;
+    background:#fff;
 }
 
 .comment-field{
     flex:1;
     height:46px;
     padding:0 18px;
-    border:2px solid rgba(129,35,35,.12);
-    border-radius:14px;
+    border:1px solid rgba(129,35,35,.1);
+    border-radius:50px;
     outline:none;
     background:#fafafa;
     font-size:14px;
@@ -636,11 +638,11 @@ body{
 }
 
 .comment-send-btn{
-    min-width:120px;
+    min-width:100px;
     height:46px;
-    padding:0 22px;
+    padding:0 20px;
     border:none;
-    border-radius:14px;
+    border-radius:50px;
     background:var(--red);
     color:#fff;
     font-size:14px;
@@ -661,13 +663,13 @@ body{
 }
 
 .comment-attach-btn {
-    min-width: 120px;
+    min-width: 100px;
     height: 46px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px dashed rgba(129,35,35,.25);
-    border-radius: 14px;
+    border: 1px solid rgba(129,35,35,.2);
+    border-radius: 50px;
     background: #fff;
     color: var(--red);
     font-size: 13px;
@@ -891,4 +893,146 @@ body{
 
 .post-comments.open::-webkit-scrollbar-thumb:hover {
     background: rgba(129,35,35,.45);
+}
+
+/* ===========================
+Кнопка входа как обычный текст
+=========================== */
+
+.header-profile {
+    background: transparent;
+    border: none;
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+
+    cursor: pointer;
+
+    font: inherit;
+}
+
+.header-profile .username {
+    color: #666;
+    font-size: 16px;
+    font-weight: 600;
+
+    transition: color .25s ease;
+}
+
+.header-profile:hover .username {
+    color: var(--red);
+    text-decoration: underline;
+}
+
+.header-profile:active .username {
+    color: var(--red-dark);
+}
+
+.page-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    position: fixed;
+
+    top: 20px;
+    right: 20px;
+
+    min-width: 300px;
+    max-width: 400px;
+
+    padding: 15px 20px;
+
+    border-radius: 14px;
+
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+
+    box-shadow: 0 15px 35px rgba(0,0,0,.2);
+
+    z-index: 9999;
+
+    animation: toastShow .35s ease, toastHide .35s ease 4s forwards;
+}
+
+.page-message.success {
+    background: #2e7d32;
+}
+
+.page-message.error {
+    background: #c62828;
+}
+
+/* УВЕДОМЛЕНИЯ */
+
+.header-actions {
+    position: relative;
+}
+
+.notifications-menu {
+    position: absolute;
+    top: 58px;
+    right: 55px;
+
+    width: 320px;
+    background: #ffffff;
+    border-radius: 16px;
+
+    border: 1px solid rgba(129, 35, 35, 0.15);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.18);
+
+    overflow: hidden;
+
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+    pointer-events: none;
+
+    transition: opacity 0.25s ease, transform 0.25s ease;
+
+    z-index: 1000;
+}
+
+.notifications-menu.active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.notification-item {
+    padding: 15px 18px;
+    border-bottom: 1px solid #ececec;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background: rgba(129, 35, 35, 0.06);
+}
+
+
+@keyframes toastShow {
+    from {
+        opacity: 0;
+        transform: translateX(120%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes toastHide {
+    to {
+        opacity: 0;
+        transform: translateX(120%);
+    }
 }

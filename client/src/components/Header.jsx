@@ -1,16 +1,39 @@
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
-function Header({ onOpenAuthModal, onLogout }) {
+function Header({ onOpenAuthModal }) {
   const isAuth = !!localStorage.getItem("token");
+
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const notificationRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setShowNotifications(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="header">
       <div className="header-container">
         <Link to="/main" className="logo-link">
           <span className="logo-icon">🏛️</span>
-          <span className="logo-text">
-            Arch<span>Space</span>
-          </span>
+
+          <div className="logo-text">
+            ArchSpace
+          </div>
         </Link>
 
         <div className="header-search">
@@ -22,9 +45,38 @@ function Header({ onOpenAuthModal, onLogout }) {
         </div>
 
         <div className="header-actions">
-          <button className="icon-btn" type="button">
-            🔔
-          </button>
+          <div
+            className="notification-wrapper"
+            ref={notificationRef}
+          >
+            <button
+              className="icon-btn"
+              type="button"
+              onClick={() =>
+                setShowNotifications(!showNotifications)
+              }
+            >
+              🔔
+            </button>
+
+            <div
+              className={`notifications-menu ${
+                showNotifications ? "active" : ""
+              }`}
+            >
+              <div className="notification-item">
+                Васильчук прокомментировал вашу публикацию
+              </div>
+
+              <div className="notification-item">
+                Анна Хувротовна поставила лайк вашей публикации
+              </div>
+
+              <div className="notification-item">
+                Букунов отказался от вашей группый нахуй
+              </div>
+            </div>
+          </div>
 
           {isAuth ? (
             <Link to="/profile" className="avatar-btn">
@@ -45,7 +97,6 @@ function Header({ onOpenAuthModal, onLogout }) {
               </span>
             </button>
           )}
-
         </div>
       </div>
     </header>
