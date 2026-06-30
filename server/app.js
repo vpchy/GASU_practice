@@ -1,13 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config({ path: "./config/.env" });
-
 import express from "express";
 import cors from "cors";
 import fs from "fs";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
 import {isValidEmail, isStrongPassword, isValidPhone} from './validators.js';
-import { stringify } from "querystring";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT || 3000;
@@ -22,7 +20,6 @@ app.use(cors());
 app.use(express.json());
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
-    
     
     if(!authHeader){
         return res.status(401).json({
@@ -50,6 +47,7 @@ function authMiddleware(req, res, next) {
 
 app.get("/", (req, res) => {
     res.json({ message: "Архитектурный блог API" });
+
 });
 
 
@@ -181,6 +179,8 @@ app.get("/posts", (req, res) => {
     const users = JSON.parse(fs.readFileSync("./data/users.json", "utf-8"));
     const comments = JSON.parse(fs.readFileSync("./data/comments.json", "utf-8"));
 
+    
+    
     const result = [];
 
     for (const post of posts) {
@@ -216,7 +216,7 @@ app.get("/posts", (req, res) => {
                 time: comment.time
             });
         }
-
+        
         result.push({
             id: post.id,
             author,
@@ -227,8 +227,13 @@ app.get("/posts", (req, res) => {
             comments: postComments
         });
     }
+    
+    const sorted_res = result.sort(
+        (a, b) => new Date(b.time) - new Date(a.time)
+    );
 
-    res.json(result);
+
+    res.json(sorted_res);
 });
 
 app.post("/posts", authMiddleware, (req, res) => {
@@ -243,7 +248,7 @@ app.post("/posts", authMiddleware, (req, res) => {
         });
     }
     const newPost = {
-        id: posts.length + 1,
+        id: posts.length > 0 ? Math.max(...posts.map(p => p.id)) + 1 : 1,
         authorId: req.user.id,
         title: req.body.title,
         text: req.body.text,
@@ -320,8 +325,11 @@ app.get("/my-posts", authMiddleware, (req, res) => {
             comments: postComments
         });
     }
+    const sorted_res = result.sort(
+        (a, b) => new Date(b.time) - new Date(a.time)
+    );
 
-    res.json(result);
+    res.json(sorted_res);
 })
 
 app.put("/posts/:id", authMiddleware, (req, res) => {
@@ -362,8 +370,7 @@ app.put("/posts/:id", authMiddleware, (req, res) => {
     });
 });
 
-app.delete("/posts/:id", authMiddleware, (req, res) =>{
-
+app.delete("/posts/:id/del", authMiddleware, (req, res) =>{
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
 
     const post = posts.find(c => c.id === Number(req.params.id));
@@ -382,9 +389,9 @@ app.delete("/posts/:id", authMiddleware, (req, res) =>{
         message: "Вы не можете удалять чужой пост"
         });
     }
-    const index = posts.findIndex(p => p.id === Number(req.params.id));
-    posts.splice(index, 1);
-    fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
+    const postId = Number(req.params.id);
+    const filteredPosts = posts.filter(p => p.id !== postId);
+    fs.writeFileSync("./data/posts.json", JSON.stringify(filteredPosts, null, 4));
     //коменты тож удаляем
     const comments = JSON.parse(
         fs.readFileSync("./data/comments.json", "utf-8")
@@ -426,14 +433,9 @@ app.post("/posts/:id/like", authMiddleware, (req, res) => {
 
     if(post.likedBy.includes(req.user.id)){
         post.likes--;
-        console.log("До:", post.likedBy);
         const index = post.likedBy.indexOf(req.user.id);
-        console.log("id:", req.user.id);
-        console.log("index:", index);
-
         post.likedBy.splice(index, 1);
 
-        console.log("После:", post.likedBy);
         fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
         return res.json({
             success: true,
@@ -506,7 +508,7 @@ app.post("/posts/:id/comments", authMiddleware, (req, res) => {
     }
 
     const newComment = {
-        id: comments.length + 1,
+        id: comments.length > 0 ? Math.max(...comments.map(c => c.id)) + 1 : 1,
         postId: Number(req.params.id),
         authorId: req.user.id,
         text: req.body.text,
