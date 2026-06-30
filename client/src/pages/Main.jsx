@@ -6,7 +6,8 @@ import {
     updatePost as apiUpdatePost,
     createComment as apiCreateComment,
     likePost as apiLikePost,
-    deletePost as apiDeletePost
+    deletePost as apiDeletePost,
+    uploadFile
 } from "../api";
 
 function Main() {
@@ -34,6 +35,8 @@ function Main() {
 
     // имя прикрепленного файла к публикации
     const [postAttachmentName, setPostAttachmentName] = useState("");
+    const [postAttachmentFile, setPostAttachmentFile] = useState(null);
+    const [postAttachmentError, setPostAttachmentError] = useState("");
 
     // имя файла для каждого комментария
     const [commentAttachmentNames, setCommentAttachmentNames] = useState({});
@@ -155,20 +158,34 @@ function Main() {
 
         try {
 
+            let attachment = null;
+            let attachmentName = null;
+
+            if (postAttachmentFile) {
+                const uploadRes = await uploadFile(postAttachmentFile);
+                console.log("uploadRes", uploadRes);
+                if (!uploadRes.success) {
+                    showMessage(uploadRes.message || "Ошибка при загрузке файла", "error");
+                    return;
+                }
+                attachment = uploadRes.file.url;
+                attachmentName = uploadRes.file.originalName;
+            }
+
+            const payload = { title, text };
+            if (attachment) {
+                payload.attachment = attachment;
+                payload.attachmentName = attachmentName;
+            }
+
             let data;
 
             if (editingPostId) {
                 // обновляем существующий пост
-                data = await apiUpdatePost(editingPostId, {
-                    title,
-                    text
-                });
+                data = await apiUpdatePost(editingPostId, payload);
             } else {
                 // создаем новый пост
-                data = await apiCreatePost({
-                    title,
-                    text
-                });
+                data = await apiCreatePost(payload);
             }
 
             if (!data.success) {
@@ -180,6 +197,9 @@ function Main() {
             // очищаем форму
             setTitle("");
             setText("");
+            setPostAttachmentName("");
+            setPostAttachmentFile(null);
+            setPostAttachmentError("");
 
             // закрываем форму
             setShowPostForm(false);
@@ -192,6 +212,7 @@ function Main() {
 
         } catch (error) {
             console.error(error);
+            showMessage("Ошибка сервера при создании поста", "error");
         }
 
     }
@@ -240,10 +261,32 @@ function Main() {
     function handlePostFileSelect(event) {
 
         const file = event.target.files?.[0];
+        const allowedTypes = [
+            "image/png",
+            "image/jpeg",
+            "application/pdf",
+            "text/plain",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ];
 
-        setPostAttachmentName(
-            file ? file.name : ""
-        );
+        if (!file) {
+            setPostAttachmentName("");
+            setPostAttachmentFile(null);
+            setPostAttachmentError("");
+            return;
+        }
+
+        if (!allowedTypes.includes(file.type)) {
+            setPostAttachmentName("");
+            setPostAttachmentFile(null);
+            setPostAttachmentError("Только PNG, JPG, PDF, DOC, DOCX или TXT.");
+            return;
+        }
+
+        setPostAttachmentError("");
+        setPostAttachmentFile(file);
+        setPostAttachmentName(file.name);
 
     }
 
@@ -366,6 +409,16 @@ function Main() {
                         </span>
 
                     )}
+                    {postAttachmentError && (
+                        <div className="attachment-error">
+                            {postAttachmentError}
+                        </div>
+                    )}
+                    {postAttachmentError && (
+                        <div className="attachment-error">
+                            {postAttachmentError}
+                        </div>
+                    )}
 
                 </div>
 
@@ -471,6 +524,27 @@ function Main() {
                         <h3>{post.title}</h3>
 
                         <p>{post.text}</p>
+
+                        {post.attachment && (
+                            <div className="post-attachment">
+                                {/\.(png|jpe?g|gif|webp)$/i.test(post.attachment) ? (
+                                    <img
+                                        src={post.attachment}
+                                        alt={post.attachmentName || "Файл"}
+                                        className="post-attachment-image"
+                                    />
+                                ) : (
+                                    <a
+                                        href={post.attachment}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="attachment-link"
+                                    >
+                                        📎 {post.attachmentName || "Открыть файл"}
+                                    </a>
+                                )}
+                            </div>
+                        )}
 
                     </div>
                                         {/* кнопки действий */}

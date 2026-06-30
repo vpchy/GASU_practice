@@ -1,22 +1,2 @@
 [
-    {
-        "id": 1,
-        "login": "kirill8943@gmail.com",
-        "password": "$2b$10$OYLaouzvXo4448TR0HLatuQUEW0wY7qz9pbF2UpFHhPdP3RvQ5dA."
-    },
-    {
-        "id": 2,
-        "login": "89936483213",
-        "password": "$2b$10$cDkgdc5sdg6IBLle785Yo.iG5jEn0tLE/WdY4UpiTzw8dMJVSFNWK"
-    },
-    {
-        "id": 3,
-        "login": "test@gmail.com",
-        "password": "$2b$10$1YxcQzF4oGna/o3DSFlkre0rs4Ucp6DiD.NotufHFMl3hy3r7876m"
-    },
-    {
-        "id": 4,
-        "login": "aaa@mail.ru",
-        "password": "$2b$10$NwKcZwPoO1Y/mLdeBGHAA.B8vPeGx.8Itu6eOBK2HTluWLcSr7hdO"
-    }
 ]

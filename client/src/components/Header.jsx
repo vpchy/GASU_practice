@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { getMe } from "../api/profile";
 
-function Header({ onOpenAuthModal }) {
-  const isAuth = !!localStorage.getItem("token");
-
+function Header({ onOpenAuthModal, onLogout }) {
+  const [isAuth, setIsAuth] = useState(!!localStorage.getItem("token"));
+  const [user, setUser] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
 
   const notificationRef = useRef(null);
@@ -22,6 +23,41 @@ function Header({ onOpenAuthModal }) {
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const res = await getMe();
+        if (res.success) {
+          setUser(res.data);
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        setUser(null);
+      }
+    }
+
+    if (isAuth) {
+      loadUser();
+    } else {
+      setUser(null);
+    }
+  }, [isAuth]);
+
+  useEffect(() => {
+    function handleAuthChange() {
+      setIsAuth(!!localStorage.getItem("token"));
+    }
+
+    window.addEventListener("user-auth-changed", handleAuthChange);
+    window.addEventListener("storage", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("user-auth-changed", handleAuthChange);
+      window.removeEventListener("storage", handleAuthChange);
     };
   }, []);
 
@@ -81,7 +117,7 @@ function Header({ onOpenAuthModal }) {
           {isAuth ? (
             <Link to="/profile" className="avatar-btn">
               <img
-                src="/default-avatar.png"
+                src={user?.avatar || "/default-avatar.png"}
                 alt="Аватар"
                 className="avatar"
               />

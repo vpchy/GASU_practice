@@ -16,11 +16,11 @@ export async function getMyPosts() {
   return res.json();
 }
 
-export async function createPost({ title, text }) {
+export async function createPost(payload) {
   const res = await fetch(`${API_URL}/posts`, {
     method: "POST",
     headers: authHeaders(),
-    body: JSON.stringify({ title, text }),
+    body: JSON.stringify(payload),
   });
 
   return res.json();
@@ -43,11 +43,11 @@ export async function deletePost(postId) {
   return res.json();
 }
 
-export async function updatePost(postId, { title, text }) {
+export async function updatePost(postId, payload) {
   const res = await fetch(`${API_URL}/posts/${postId}`, {
     method: "PUT",
     headers: authHeaders(),
-    body: JSON.stringify({ title, text }),
+    body: JSON.stringify(payload),
   });
 
   return res.json();

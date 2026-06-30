@@ -10,6 +10,8 @@ import {
     deletePost as apiDeletePost,
     updatePost as apiUpdatePost
 } from "../api";
+import { getMe, updateMe } from "../api/profile";
+import { uploadFile } from "../api/uploads";
 
 function Profile() {
 
@@ -18,6 +20,7 @@ function Profile() {
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("success");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [user, setUser] = useState(null);
     
     useEffect(() => {
         if (!message) return;
@@ -36,6 +39,8 @@ function Profile() {
 
     // имя прикрепленного файла к публикации
     const [postAttachmentName, setPostAttachmentName] = useState("");
+    const [postAttachmentFile, setPostAttachmentFile] = useState(null);
+    const [postAttachmentError, setPostAttachmentError] = useState("");
 
     // имена файлов комментариев
     const [commentAttachmentNames, setCommentAttachmentNames] = useState({});
@@ -69,11 +74,24 @@ function Profile() {
     }
 
     // при открытии страницы сразу получаем посты
+
+    async function loadUser() {
+        try {
+            const res = await getMe();
+
+            if (res.success) {
+                setUser(res.data);
+            }
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     useEffect(() => {
         loadPosts();
+        loadUser();
     }, []);
-
-
     // если нажали в любое место страницы,
     // меню "..." должно закрыться
     useEffect(() => {
@@ -146,20 +164,33 @@ function Profile() {
 
         try {
 
+            let attachment = null;
+            let attachmentName = null;
+
+            if (postAttachmentFile) {
+                const uploadRes = await uploadFile(postAttachmentFile);
+                if (!uploadRes.success) {
+                    showMessage(uploadRes.message || "Ошибка при загрузке файла", "error");
+                    return;
+                }
+                attachment = uploadRes.file.url;
+                attachmentName = uploadRes.file.originalName;
+            }
+
+            const payload = { title, text };
+            if (attachment) {
+                payload.attachment = attachment;
+                payload.attachmentName = attachmentName;
+            }
+
             let data;
 
             if (editingPostId) {
                 // обновляем существующий пост
-                data = await apiUpdatePost(editingPostId, {
-                    title,
-                    text
-                });
+                data = await apiUpdatePost(editingPostId, payload);
             } else {
                 // создаем новый пост
-                data = await apiCreatePost({
-                    title,
-                    text
-                });
+                data = await apiCreatePost(payload);
             }
 
             if (!data.success) {
@@ -171,6 +202,9 @@ function Profile() {
             // очищаем форму
             setTitle("");
             setText("");
+            setPostAttachmentName("");
+            setPostAttachmentFile(null);
+            setPostAttachmentError("");
 
             // закрываем форму
             setShowPostForm(false);
@@ -183,6 +217,7 @@ function Profile() {
 
         } catch (error) {
             console.error(error);
+            showMessage("Ошибка сервера при создании поста", "error");
         }
 
     }
@@ -229,10 +264,32 @@ function Profile() {
     function handlePostFileSelect(event) {
 
         const file = event.target.files?.[0];
+        const allowedTypes = [
+            "image/png",
+            "image/jpeg",
+            "application/pdf",
+            "text/plain",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ];
 
-        setPostAttachmentName(
-            file ? file.name : ""
-        );
+        if (!file) {
+            setPostAttachmentName("");
+            setPostAttachmentFile(null);
+            setPostAttachmentError("");
+            return;
+        }
+
+        if (!allowedTypes.includes(file.type)) {
+            setPostAttachmentName("");
+            setPostAttachmentFile(null);
+            setPostAttachmentError("Только PNG, JPG, PDF, DOC, DOCX или TXT.");
+            return;
+        }
+
+        setPostAttachmentError("");
+        setPostAttachmentFile(file);
+        setPostAttachmentName(file.name);
 
     }
 
@@ -263,7 +320,7 @@ function Profile() {
                     <div className="profile-avatar-wrapper">
 
                         <img
-                            src="https://w7.pngwing.com/pngs/665/132/png-transparent-user-defult-avatar-thumbnail.png"
+                            src={user?.avatar || "https://w7.pngwing.com/pngs/665/132/png-transparent-user-defult-avatar-thumbnail.png"}
                             className="profile-avatar"
                             alt="avatar"
                         />
@@ -316,19 +373,19 @@ function Profile() {
                 <div className="profile-details">
 
                     <h1 className="profile-name">
-                        Имя Фамилия
+                        {user?.name}
                     </h1>
 
                     <span className="profile-username">
-                        @username
+                        @{user?.username}
                     </span>
 
                     <p className="profile-bio">
-                        Здесь будет описание профиля
+                        {user?.bio}
                     </p>
 
                     <div className="profile-meta">
-                        📍 Город
+                        📍 {user?.location}
                     </div>
 
                     <div className="profile-stats">
@@ -474,6 +531,11 @@ function Profile() {
                         </span>
 
                     )}
+                    {postAttachmentError && (
+                        <div className="attachment-error">
+                            {postAttachmentError}
+                        </div>
+                    )}
 
                 </div>
 
@@ -585,6 +647,27 @@ function Profile() {
                         <h3>{post.title}</h3>
 
                         <p>{post.text}</p>
+
+                        {post.attachment && (
+                            <div className="post-attachment">
+                                {/\.(png|jpe?g|gif|webp)$/i.test(post.attachment) ? (
+                                    <img
+                                        src={post.attachment}
+                                        alt={post.attachmentName || "Файл"}
+                                        className="post-attachment-image"
+                                    />
+                                ) : (
+                                    <a
+                                        href={post.attachment}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="attachment-link"
+                                    >
+                                        📎 {post.attachmentName || "Открыть файл"}
+                                    </a>
+                                )}
+                            </div>
+                        )}
 
                     </div>
 
@@ -731,19 +814,43 @@ function Profile() {
     </section>
 
     <ProfileEditModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        userData={{
-            name: "Имя Фамилия",
-            username: "@username",
-            bio: "Здесь будет описание профиля",
-            location: "Город",
-            avatar: null
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            userData={user}
+            onSave={async (data) => {
+            try {
+                let avatar = data.avatar;
+
+                if (data.avatarFile instanceof File) {
+                    const uploadRes = await uploadFile(data.avatarFile);
+                    if (!uploadRes.success) {
+                        showMessage(uploadRes.message || "Ошибка загрузки файла", "error");
+                        return;
+                    }
+                    avatar = uploadRes.file.url;
+                }
+
+                const res = await updateMe({
+                    name: data.name,
+                    username: data.username,
+                    bio: data.bio,
+                    location: data.location,
+                    avatar,
+                });
+
+                if (res.success) {
+                    setUser(res.data);
+                    showMessage("Профиль сохранен");
+                } else {
+                    showMessage(res.message, "error");
+                }
+
+            } catch (error) {
+                console.error(error);
+                showMessage("Ошибка сервера", "error");
+            }
         }}
-        onSave={(data) => {
-            console.log(data);
-        }}
-    />
+        />
     {showDeleteModal && (
     <div className="modal-overlay">
         <div className="modal">

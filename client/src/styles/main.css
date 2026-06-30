@@ -460,6 +460,39 @@ body{
     color: var(--red);
     font-weight: 600;
 }
+
+.attachment-error {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #b00020;
+    font-weight: 600;
+}
+
+.post-attachment {
+    margin-top: 14px;
+}
+
+.post-attachment-image {
+    width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.attachment-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--red);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.attachment-link:hover {
+    text-decoration: underline;
+}
+
 /* ===========================
    POSTS
 =========================== */

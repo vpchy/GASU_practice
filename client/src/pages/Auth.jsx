@@ -49,12 +49,10 @@ function Auth({ onClose }) {
       alert(data.message || "Вход выполнен");
       if (data.success) {
         localStorage.setItem("token", data.token);
+        window.dispatchEvent(new Event("user-auth-changed"));
         if (onClose) {
           onClose();
         }
-      if (onClose) {
-        onClose();
-      }
       }
     } catch (error) {
       alert("Ошибка сервера или сети");

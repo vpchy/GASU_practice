@@ -127,6 +127,13 @@
     display: none;
 }
 
+.edit-avatar-error {
+    margin-top: 8px;
+    color: #b00020;
+    font-size: 13px;
+    font-weight: 600;
+}
+
 /* ===== ПОЛЯ ===== */
 .edit-fields {
     display: flex;

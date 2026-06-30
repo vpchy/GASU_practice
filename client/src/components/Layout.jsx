@@ -19,6 +19,7 @@ function Layout() {
 
   function logout() {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event("user-auth-changed"));
     setIsAuthModalOpen(false);
 
     window.location.href = "/main";

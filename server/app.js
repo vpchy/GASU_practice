@@ -5,6 +5,7 @@ import cors from "cors";
 import fs from "fs";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
+import multer from "multer";
 import {isValidEmail, isStrongPassword, isValidPhone} from './validators.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -16,8 +17,46 @@ if (!JWT_SECRET) {
 
 const app = express();
 
+const UPLOAD_DIR = "./uploads";
+if (!fs.existsSync(UPLOAD_DIR)) {
+    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+const uploadStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+    filename: (req, file, cb) => {
+        const safeName = file.originalname.replace(/[^a-zA-Z0-9\.\-_]/g, "_");
+        cb(null, `${Date.now()}-${safeName}`);
+    }
+});
+
+const upload = multer({
+    storage: uploadStorage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10 MB
+    },
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = [
+            "image/png",
+            "image/jpeg",
+            "application/pdf",
+            "text/plain",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ];
+
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error("Только файлы PNG, JPG, PDF, DOC, DOCX или TXT."));
+        }
+    }
+});
+
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use("/uploads", express.static(UPLOAD_DIR));
+
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
     
@@ -48,6 +87,28 @@ function authMiddleware(req, res, next) {
 app.get("/", (req, res) => {
     res.json({ message: "Архитектурный блог API" });
 
+});
+
+app.post("/upload", authMiddleware, upload.single("file"), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({
+            success: false,
+            message: "Файл не был загружен"
+        });
+    }
+
+    const url = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+    res.json({
+        success: true,
+        message: "Файл успешно загружен",
+        file: {
+            originalName: req.file.originalname,
+            mimeType: req.file.mimetype,
+            size: req.file.size,
+            url
+        }
+    });
 });
 
 
@@ -157,7 +218,12 @@ app.post("/register", async (req, res) => {
     const newUser = {
         id: users.length + 1,
         login,
-        password: hashedPassword
+        password: hashedPassword,
+        name: "",
+        username: "",
+        bio: "",
+        location: "",
+        avatar: null
     };
 
     users.push(newUser);
@@ -224,6 +290,8 @@ app.get("/posts", (req, res) => {
             text: post.text,
             time: post.time,
             likes: post.likes,
+            attachment: post.attachment || null,
+            attachmentName: post.attachmentName || null,
             comments: postComments
         });
     }
@@ -252,6 +320,8 @@ app.post("/posts", authMiddleware, (req, res) => {
         authorId: req.user.id,
         title: req.body.title,
         text: req.body.text,
+        attachment: req.body.attachment || null,
+        attachmentName: req.body.attachmentName || null,
         time: new Date().toISOString(),
         likes: 0,
         likedBy: []
@@ -322,6 +392,8 @@ app.get("/my-posts", authMiddleware, (req, res) => {
             text: post.text,
             time: post.time,
             likes: post.likes,
+            attachment: post.attachment || null,
+            attachmentName: post.attachmentName || null,
             comments: postComments
         });
     }
@@ -331,6 +403,61 @@ app.get("/my-posts", authMiddleware, (req, res) => {
 
     res.json(sorted_res);
 })
+
+
+app.get("/me", authMiddleware, (req, res) => {
+    const users = JSON.parse(fs.readFileSync("./data/users.json", "utf-8"));
+
+    const user = users.find(u => u.id === req.user.id);
+
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: "User not found"
+        });
+    }
+
+    const { password, ...safeUser } = user;
+
+    res.json({
+        success: true,
+        data: safeUser
+    });
+});
+
+app.put("/me", authMiddleware, (req, res) => {
+    const users = JSON.parse(fs.readFileSync("./data/users.json", "utf-8"));
+    
+    const userIndex = users.findIndex(u => u.id === req.user.id);
+
+    if (userIndex === -1) {
+        return res.status(404).json({
+            success: false,
+            message: "User not found"
+        });
+    }
+
+
+    const allowedFields = ["name", "username", "bio", "location", "avatar"];
+
+    const user = users[userIndex];
+
+    for (const field of allowedFields) {
+        if (field in req.body) {
+            user[field] = req.body[field];
+        }
+    }
+    fs.writeFileSync("./data/users.json", JSON.stringify(users, null, 2));
+
+    const { password, ...safeUser } = users[userIndex];
+
+    res.json({
+        success: true,
+        data: safeUser
+    });
+});
+
+
 
 app.put("/posts/:id", authMiddleware, (req, res) => {
     const posts = JSON.parse(fs.readFileSync("./data/posts.json", "utf-8"));
@@ -361,6 +488,13 @@ app.put("/posts/:id", authMiddleware, (req, res) => {
 
     post.title = req.body.title;
     post.text = req.body.text;
+
+    if ("attachment" in req.body) {
+        post.attachment = req.body.attachment || null;
+    }
+    if ("attachmentName" in req.body) {
+        post.attachmentName = req.body.attachmentName || null;
+    }
 
     fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
 
@@ -544,6 +678,15 @@ app.get("/users/:id", (req, res) => {
     return res.json(user);
 })
 
+app.use((err, req, res, next) => {
+    if (err) {
+        return res.status(400).json({
+            success: false,
+            message: err.message || "Ошибка сервера при загрузке файла"
+        });
+    }
+    next();
+});
 
 app.listen(PORT, () => {
     console.log(`Сервер запущен на http://localhost:${PORT}`);

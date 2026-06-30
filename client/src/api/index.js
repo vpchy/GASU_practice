@@ -5,6 +5,7 @@ import { registerUser, loginUser } from "./auth";
 export * from "./auth";
 export * from "./posts";
 export * from "./comments";
+export * from "./uploads";
 
 export default {
   getPosts,
