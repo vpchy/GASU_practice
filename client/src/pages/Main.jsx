@@ -1,272 +1,586 @@
 import { useEffect, useState } from "react";
 import "../styles/main.css";
-import { getPosts as apiGetPosts, createPost as apiCreatePost,
-  createComment as apiCreateComment, likePost as apiLikePost } from "../api";
+import {
+    getPosts as apiGetPosts,
+    createPost as apiCreatePost,
+    createComment as apiCreateComment,
+    likePost as apiLikePost,
+    deletePost as apiDeletePost
+} from "../api";
 
 function Main() {
-  const [posts, setPosts] = useState([]);
-  const [showPostForm, setShowPostForm] = useState(false);
-  // Добавлено только для прикрепления файлов
-  const [postAttachmentName, setPostAttachmentName] = useState("");
-  const [commentAttachmentNames, setCommentAttachmentNames] = useState({});
-  const [commentText, setCommentText] = useState({});
-  // для постов
-  const [title, setTitle] = useState("");
-  const [text, setText] = useState("");
 
-  async function loadPosts() {
-    try {
-      const data = await apiGetPosts();
-      setPosts(data);
-    } catch (error) {
-      console.error(error);
+    const [posts, setPosts] = useState([]);
+    const [showPostForm, setShowPostForm] = useState(false);
+
+    // имя прикрепленного файла к публикации
+    const [postAttachmentName, setPostAttachmentName] = useState("");
+
+    // имя файла для каждого комментария
+    const [commentAttachmentNames, setCommentAttachmentNames] = useState({});
+
+    // текст комментариев
+    const [commentText, setCommentText] = useState({});
+
+    // поля новой публикации
+    const [title, setTitle] = useState("");
+    const [text, setText] = useState("");
+
+    // открытое меню "..."
+    const [openMenu, setOpenMenu] = useState(null);
+
+    // какие комментарии сейчас раскрыты
+    const [openComments, setOpenComments] = useState({});
+
+
+    // id поста, который редактируем (null если создаем новый)
+    const [editingPostId, setEditingPostId] = useState(null);
+
+    // загрузка всех публикаций
+    async function loadPosts() {
+
+        try {
+
+            const data = await apiGetPosts();
+
+            setPosts(data);
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
     }
-  }
-
-  useEffect(() => {
-      loadPosts();
-  }, []);
 
 
-  async function likePost(postId) {
-    try {
-      const data = await apiLikePost(postId);
+    // сразу получаем публикации
+    useEffect(() => {
 
-      if (data.success) {
-        setPosts(prev => prev.map(post => post.id === postId
-                    ? { ...post, likes: data.likes } : post
-            )
-        );
-      }
-    } catch (error) {
-      console.error(error);
+        loadPosts();
+
+    }, []);
+
+
+    // закрывать меню "..." при клике в любое место
+    useEffect(() => {
+
+        function handleClick() {
+
+            setOpenMenu(null);
+
+        }
+
+        document.addEventListener("click", handleClick);
+
+        return () => {
+
+            document.removeEventListener("click", handleClick);
+
+        };
+
+    }, []);
+
+    async function deletePost(postId) {
+        try{
+            const data = await apiDeletePost(postId);
+
+            if (data.success) {
+                setPosts(prev => prev.filter(post => post.id !== postId));
+            }
+        }catch(error){ console.log(error);}
     }
-  }
-  async function createPost() {
-    try {
-      const data = await apiCreatePost({ title, text });
-      alert(data.message);
+    // поставить лайк
+    async function likePost(postId) {
 
-      if (data.success) {
-        setTitle("");
-        setText("");
-        setShowPostForm(false);
-        await loadPosts();
-      }
-    } catch (error) {
-      console.error(error);
+        try {
+
+            const data = await apiLikePost(postId);
+
+            if (data.success) {
+
+                // меняем только количество лайков
+                setPosts(prev =>
+                    prev.map(post =>
+                        post.id === postId
+                            ? {
+                                ...post,
+                                likes: data.likes
+                            }
+                            : post
+                    )
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
     }
-  }
 
-  async function sendComment(postId) {
-    const text = commentText[postId];
 
-    if (!text?.trim()) return;
+    // создать публикацию
+    async function createPost() {
 
-    try {
-      const res = await apiCreateComment(postId, text);
+        try {
 
-      if (res.success) {
-        setCommentText(prev => ({
-          ...prev,
-          [postId]: ""
-        }));
+            let data;
 
-        await loadPosts();
-      } else {
-        alert(res.message);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
+            if (editingPostId) {
+                // обновляем существующий пост
+                data = await apiUpdatePost(editingPostId, {
+                    title,
+                    text
+                });
+            } else {
+                // создаем новый пост
+                data = await apiCreatePost({
+                    title,
+                    text
+                });
+            }
 
-  // Добавлено только для прикрепления файлов
-  function handlePostFileSelect(event) {
-    const file = event.target.files?.[0];
-    setPostAttachmentName(file ? file.name : "");
-  }
+            if (!data.success) return;
 
-  function handleCommentFileSelect(event, postId) {
-    const file = event.target.files?.[0];
-
-    setCommentAttachmentNames((prev) => ({
-      ...prev,
-      [postId]: file ? file.name : ""
-    }));
-  }
-
-  return (
-    <section className="feed">
-      <button
-        className="create-post-btn"
-        type="button"
-        onClick={() => setShowPostForm(true)}
-      >
-        + Создать публикацию
-      </button>
-
-    <div className={`post-input ${showPostForm ? "open" : ""}`}>
-
-    <div className="post-top-row">
-        <input
-          className="post-title"
-          type="text"
-          placeholder="Заголовок"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        
-        <textarea
-            className="post-field"
-            placeholder="Написать публикацию..."
-            rows="6"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-        />
-
-        <button className="post-send-btn" type="button" onClick={createPost}>
-        Опубликовать
-        </button>
-
-        <button
-        className="comment-send-btn"
-        type="button"
-        onClick={() => {
+            // очищаем форму
             setTitle("");
             setText("");
+
+            // закрываем форму
             setShowPostForm(false);
-        }}
-        >
-        Отмена
-        </button>
 
-    </div>
+            // очищаем редактирование
+            setEditingPostId(null);
 
-    <div className="post-bottom-row">
+            // заново получаем список публикаций
+            await loadPosts();
 
-        <div className="post-attach-wrapper">
+        } catch (error) {
+            console.error(error);
+        }
 
-        <label className="attach-btn" htmlFor="post-file-input">
-            📎 Прикрепить файл
-        </label>
+    }
 
-        <input
-            id="post-file-input"
-            className="attach-input"
-            type="file"
-            accept="image/*,.pdf,.doc,.docx,.txt"
-            onChange={handlePostFileSelect}
-        />
 
-        </div>
 
-        {postAttachmentName && (
-        <span className="attachment-preview">
-            {postAttachmentName}
-        </span>
-        )}
+    // отправка комментария
+    async function sendComment(postId) {
 
-    </div>
+        const text = commentText[postId];
 
-    </div>
+        if (!text?.trim()) return;
 
-      {posts.map((post) => (
-        <article key={post.id} className="post">
-          <div className="post-header">
-            <div className="post-author">
-              <span className="post-author-name">{post.author}</span>
-              <span className="post-time">
-                {new Date(post.time).toLocaleString("ru-RU")}
-            </span>
-            </div>
+        try {
 
-            <button className="post-more" type="button">
-              •••
-            </button>
-          </div>
+            const res = await apiCreateComment(postId, text);
 
-          <div className="post-content">
-            <h3>{post.title}</h3>
-            <p>{post.text}</p>
-          </div>
+            if (res.success) {
 
-          <div className="post-actions">
-            <button className="action-btn" type="button" onClick={() => likePost(post.id)}>
-              ❤️ {post.likes || 0}
-            </button>
-
-            <button className="action-btn" type="button">
-              💬 {post.comments?.length || 0}
-            </button>
-
-            <button className="action-btn" type="button">
-              🔄
-            </button>
-          </div>
-
-          <div className="post-comments">
-            {post.comments?.map((comment) => (
-              <div key={comment.id} className="comment">
-                <div className="comment-body">
-                  <div className="comment-author">{comment.author}</div>
-                  <div className="comment-text">{comment.text}</div>
-                  <div className="comment-time">{new Date(comment.time).toLocaleString("ru-RU")}</div>
-                </div>
-              </div>
-            ))}
-                        <div className="comment-input">
-              <input
-                className="comment-field"
-                type="text"
-                placeholder="Написать комментарий..."
-                value={commentText[post.id] || ""}
-                onChange={(e) =>
+                // очищаем поле именно этого комментария
                 setCommentText(prev => ({
-                  ...prev,
-                  [post.id]: e.target.value
-                }))
-              } 
-              />
+                    ...prev,
+                    [postId]: ""
+                }));
 
-              <div className="comment-attach-wrapper">
-                <label
-                  className="comment-attach-btn"
-                  htmlFor={`comment-file-${post.id}`}
-                >
-                  📎 Файл
-                </label>
+                await loadPosts();
 
-                <input
-                  id={`comment-file-${post.id}`}
-                  className="attach-input"
-                  type="file"
-                  accept="image/*,.pdf,.doc,.docx,.txt"
-                  onChange={(event) =>
-                    handleCommentFileSelect(event, post.id)
-                  }
-                />
-              </div>
+            } else {
 
-              <button
-                className="comment-send-btn"
+                alert(res.message);
+
+            }
+
+        } catch (err) {
+
+            console.error(err);
+
+        }
+
+    }
+
+
+    // вывод имени выбранного файла публикации
+    function handlePostFileSelect(event) {
+
+        const file = event.target.files?.[0];
+
+        setPostAttachmentName(
+            file ? file.name : ""
+        );
+
+    }
+
+
+    // вывод имени файла комментария
+    function handleCommentFileSelect(event, postId) {
+
+        const file = event.target.files?.[0];
+
+        setCommentAttachmentNames(prev => ({
+            ...prev,
+            [postId]: file ? file.name : ""
+        }));
+
+    }
+
+
+    return (
+
+        <section className="feed">
+                      {/* кнопка создания публикации */}
+            <button
+                className="create-post-btn"
                 type="button"
-                onClick={() => sendComment(post.id)}
-              >
-                Отправить
-              </button>
+                onClick={() => setShowPostForm(true)}
+            >
+                + Создать публикацию
+            </button>
 
-              {commentAttachmentNames[post.id] && (
-                <span className="attachment-preview">
-                  {commentAttachmentNames[post.id]}
-                </span>
-              )}
+
+            {/* форма создания публикации */}
+            <div className={`post-input ${showPostForm ? "open" : ""}`}>
+
+                <div className="post-top-row">
+
+                    <input
+                        className="post-title"
+                        placeholder="Заголовок"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+
+                </div>
+
+
+                <div className="post-row">
+
+                    <textarea
+                        className="post-field"
+                        placeholder="Написать публикацию..."
+                        rows="6"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                    />
+
+
+                    <div className="post-button-group">
+
+                        <button
+                            className="post-send-btn"
+                            type="button"
+                            onClick={createPost}
+                        >
+                            Опубликовать
+                        </button>
+
+                        {/* закрыть форму */}
+                        <button
+                            className="comment-send-btn"
+                            type="button"
+                            onClick={() => {
+
+                                setTitle("");
+                                setText("");
+                                setShowPostForm(false);
+
+                            }}
+                        >
+                            Отмена
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div className="post-bottom-row">
+
+                    <div className="post-attach-wrapper">
+
+                        <label
+                            className="attach-btn"
+                            htmlFor="post-file-input"
+                        >
+                            📎 Прикрепить файл
+                        </label>
+
+                        <input
+                            id="post-file-input"
+                            className="attach-input"
+                            type="file"
+                            accept="image/*,.pdf,.doc,.docx,.txt"
+                            onChange={handlePostFileSelect}
+                        />
+
+                    </div>
+
+
+                    {/* отображаем имя выбранного файла */}
+                    {postAttachmentName && (
+
+                        <span className="attachment-preview">
+                            {postAttachmentName}
+                        </span>
+
+                    )}
+
+                </div>
+
             </div>
-          </div>
-        </article>
-      ))}
-    </section>
-  );
+
+
+            {/* список публикаций */}
+            {posts.map((post) => (
+
+                <article
+                    key={post.id}
+                    className="post"
+                >
+
+                    <div className="post-header">
+
+                        <div className="post-author">
+
+                            <span className="post-author-name">
+                                {post.author}
+                            </span>
+
+                            <span className="post-time">
+                                {new Date(post.time).toLocaleString("ru-RU")}
+                            </span>
+
+                        </div>
+
+
+                        {/* меню действий */}
+                        <div className="post-menu-wrapper">
+
+                            <button
+                                className="post-more"
+                                type="button"
+                                onClick={(e) => {
+
+                                    // чтобы document не закрыл меню сразу
+                                    e.stopPropagation();
+
+                                    setOpenMenu(
+                                        openMenu === post.id
+                                            ? null
+                                            : post.id
+                                    );
+
+                                }}
+                            >
+                                •••
+                            </button>
+
+
+                            <div
+                                className={`post-menu ${
+                                    openMenu === post.id ? "show" : ""
+                                }`}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+
+                                <button
+                                    className="post-menu-item"
+                                    type="button"
+                                    onClick={() => {
+
+                                        // заполняем форму данными поста
+                                        setTitle(post.title);
+                                        setText(post.text);
+
+                                        // переводим в режим редактирования
+                                        setEditingPostId(post.id);
+
+                                        // открываем форму
+                                        setShowPostForm(true);
+
+                                        // закрываем меню
+                                        setOpenMenu(null);
+
+                                    }}
+                                >
+                                    Редактировать
+                                </button>
+
+                                <button
+                                    className="post-menu-item delete"
+                                    type="button"
+                                    onClick={() => {
+                                        deletePost(post.id);
+                                        setOpenMenu(null);
+                                    }}
+                                >
+                                    Удалить
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="post-content">
+
+                        <h3>{post.title}</h3>
+
+                        <p>{post.text}</p>
+
+                    </div>
+                                        {/* кнопки действий */}
+                    <div className="post-actions">
+
+                        <button
+                            className="action-btn"
+                            type="button"
+                            onClick={() => likePost(post.id)}
+                        >
+                            ❤️ {post.likes || 0}
+                        </button>
+
+
+                        {/* открыть/закрыть комментарии */}
+                        <button
+                            className="action-btn"
+                            type="button"
+                            onClick={() =>
+                                setOpenComments(prev => ({
+                                    ...prev,
+                                    [post.id]: !prev[post.id]
+                                }))
+                            }
+                        >
+                            💬 {post.comments?.length || 0}
+                        </button>
+
+
+                        <button
+                            className="action-btn"
+                            type="button"
+                        >
+                            🔄
+                        </button>
+
+                    </div>
+
+
+                    {/* комментарии */}
+                    <div
+                        className={`post-comments ${
+                            openComments[post.id] ? "open" : ""
+                        }`}
+                    >
+
+                        {/* отдельный контейнер нужен,
+                            чтобы комментарии прокручивались,
+                            а поле ввода оставалось снизу */}
+                        <div className="comment-list">
+
+                            {post.comments?.map((comment) => (
+
+                                <div
+                                    key={comment.id}
+                                    className="comment"
+                                >
+
+                                    <div className="comment-body">
+
+                                        <div className="comment-author">
+                                            {comment.author}
+                                        </div>
+
+                                        <div className="comment-text">
+                                            {comment.text}
+                                        </div>
+
+                                        <div className="comment-time">
+                                            {new Date(comment.time).toLocaleString("ru-RU")}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            ))}
+
+                        </div>
+
+
+                        {/* форма добавления комментария */}
+                        <div className="comment-input">
+
+                            <input
+                                className="comment-field"
+                                type="text"
+                                placeholder="Написать комментарий..."
+                                value={commentText[post.id] || ""}
+                                onChange={(e) =>
+                                    setCommentText(prev => ({
+                                        ...prev,
+                                        [post.id]: e.target.value
+                                    }))
+                                }
+                            />
+
+                            <div className="comment-attach-wrapper">
+
+                                <label
+                                    className="comment-attach-btn"
+                                    htmlFor={`comment-file-${post.id}`}
+                                >
+                                    📎 Файл
+                                </label>
+
+                                <input
+                                    id={`comment-file-${post.id}`}
+                                    className="attach-input"
+                                    type="file"
+                                    accept="image/*,.pdf,.doc,.docx,.txt"
+                                    onChange={(event) =>
+                                        handleCommentFileSelect(
+                                            event,
+                                            post.id
+                                        )
+                                    }
+                                />
+
+                            </div>
+                                                        <button
+                                className="comment-send-btn"
+                                type="button"
+                                onClick={() => sendComment(post.id)}
+                            >
+                                Отправить
+                            </button>
+
+
+                            {/* имя прикрепленного файла */}
+                            {commentAttachmentNames[post.id] && (
+
+                                <span className="attachment-preview">
+                                    {commentAttachmentNames[post.id]}
+                                </span>
+
+                            )}
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            ))}
+
+        </section>
+
+    );
+
 }
 
 export default Main;

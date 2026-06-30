@@ -1,0 +1,152 @@
+/* ===========================
+   ABOUT PAGE
+=========================== */
+:root {
+    --red: #812323;
+    --red-dark: #ad3030;
+    --red-bg: rgba(129, 35, 35, 0.05);
+    --red-border: rgba(129, 35, 35, 0.12);
+    --bg: #efedea;
+    --text: #2d2d2d;
+    --shadow: 0 10px 30px rgba(0,0,0,.08);
+    --radius: 18px;
+    --transition: .3s ease;
+}
+
+body.about-page {
+    background: #812323;
+}
+
+.about-page {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.about-block {
+    background: #fff;
+    border-radius: 22px;
+    padding: 32px 36px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(129, 35, 35, 0.06);
+}
+
+.about-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--red);
+    margin-bottom: 16px;
+}
+
+.about-content p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #444;
+    margin-bottom: 12px;
+}
+
+.about-features {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.about-features li {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #444;
+    padding-left: 4px;
+}
+
+/* ===========================
+   TEAM
+=========================== */
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    margin-top: 8px;
+}
+
+.team-card {
+    background: #faf8f5;
+    border-radius: 18px;
+    padding: 24px 20px 20px;
+    text-align: center;
+    transition: 0.25s;
+    border: 1px solid rgba(129, 35, 35, 0.04);
+}
+
+.team-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+.team-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 14px;
+    border: 3px solid var(--red);
+    box-shadow: 0 4px 12px rgba(129, 35, 35, 0.15);
+}
+
+.team-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.team-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.team-role {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--red);
+    margin-bottom: 8px;
+}
+
+.team-desc {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 700px) {
+    .about-block {
+        padding: 20px;
+    }
+
+    .about-title {
+        font-size: 20px;
+    }
+
+    .team-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .team-card {
+        padding: 18px;
+    }
+}

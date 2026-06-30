@@ -1,4 +1,4 @@
-import { getPosts, getMyPosts, createPost, likePost } from "./posts";
+import { getPosts, getMyPosts, createPost, likePost, deletePost } from "./posts";
 import { createComment } from "./comments";
 import { registerUser, loginUser } from "./auth";
 
@@ -14,4 +14,5 @@ export default {
   createComment,
   registerUser,
   loginUser,
+  deletePost,
 };
