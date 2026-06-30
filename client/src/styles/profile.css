@@ -15,6 +15,7 @@
     --text: #2d2d2d;
     --text-light: #888888;
     --transition: 0.3s ease;
+    --card: #fcfaf9;
 }
 
 body {
@@ -386,3 +387,76 @@ body {
     background: #fcfaf9;
     z-index: 5;
 }
+
+.profile-menu-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: 35px;
+  background: white;
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  z-index: 100;
+}
+
+.danger-btn {
+  background: none;
+  border: none;
+  color: #b00020;
+  padding: 8px 12px;
+  cursor: pointer;
+  width: 160px;
+  text-align: left;
+}
+
+.danger-btn:hover {
+  background: rgba(176,0,32,0.08);
+}
+
+/* MODAL */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  background: rgb(255, 248, 248);
+  padding: 25px;
+  border-radius: 12px;
+  width: 320px;
+  text-align: center;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-danger {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: #b00020;
+  color: white;
+  cursor: pointer;
+}
+

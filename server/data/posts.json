@@ -74,9 +74,38 @@
     {
         "id": 15,
         "authorId": 3,
-        "title": "asdfas",
-        "text": "asdfasfdsa",
+        "title": "asfsafasdfas",
+        "text": "asdfasfdsaasdfsaf",
         "time": "2026-06-30T15:26:07.942Z",
+        "likes": 0,
+        "likedBy": []
+    },
+    {
+        "id": 16,
+        "authorId": 4,
+        "title": "а я не ебала овцу",
+        "text": "прикол",
+        "time": "2026-06-30T15:43:27.969Z",
+        "likes": 0,
+        "likedBy": []
+    },
+    {
+        "id": 17,
+        "authorId": 4,
+        "title": "блин",
+        "text": "почему удалили текст про черемшу((",
+        "time": "2026-06-30T16:12:22.925Z",
+        "likes": 1,
+        "likedBy": [
+            3
+        ]
+    },
+    {
+        "id": 18,
+        "authorId": 3,
+        "title": "said",
+        "text": "asfsafasdfsafas",
+        "time": "2026-06-30T17:44:31.689Z",
         "likes": 0,
         "likedBy": []
     }

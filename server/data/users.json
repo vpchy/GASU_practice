@@ -13,5 +13,10 @@
         "id": 3,
         "login": "test@gmail.com",
         "password": "$2b$10$1YxcQzF4oGna/o3DSFlkre0rs4Ucp6DiD.NotufHFMl3hy3r7876m"
+    },
+    {
+        "id": 4,
+        "login": "aaa@mail.ru",
+        "password": "$2b$10$NwKcZwPoO1Y/mLdeBGHAA.B8vPeGx.8Itu6eOBK2HTluWLcSr7hdO"
     }
 ]

@@ -69,11 +69,11 @@ function Header({ onOpenAuthModal }) {
               </div>
 
               <div className="notification-item">
-                Анна Хувротовна поставила лайк вашей публикации
+                Анна Хуевротовна поставила лайк вашей публикации
               </div>
 
               <div className="notification-item">
-                Букунов отказался от вашей группый нахуй
+                Букунов отказался от вашей группы нахуй
               </div>
             </div>
           </div>

@@ -983,7 +983,9 @@ body{
     border: 1px solid rgba(129, 35, 35, 0.15);
     box-shadow: 0 15px 45px rgba(0, 0, 0, 0.18);
 
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 350px;
 
     opacity: 0;
     transform: translateY(-10px) scale(0.97);
@@ -1015,6 +1017,23 @@ body{
 
 .notification-item:hover {
     background: rgba(129, 35, 35, 0.06);
+}
+
+.notifications-menu::-webkit-scrollbar {
+    width: 8px;
+}
+
+.notifications-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.notifications-menu::-webkit-scrollbar-thumb {
+    background: rgba(129, 35, 35, 0.25);
+    border-radius: 20px;
+}
+
+.notifications-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(129, 35, 35, 0.45);
 }
 
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "../styles/main.css";
 import "../styles/profile.css";
+import ProfileEditModal from "../pages/ProfileEditModal";
 import {
     getMyPosts as apiGetMyPosts,
     createPost as apiCreatePost,
@@ -16,7 +17,8 @@ function Profile() {
     const [showPostForm, setShowPostForm] = useState(false);
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("success");
-
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    
     useEffect(() => {
         if (!message) return;
 
@@ -54,6 +56,7 @@ function Profile() {
     // id поста, который редактируем (null если создаем новый)
     const [editingPostId, setEditingPostId] = useState(null);
 
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     // загрузка всех постов пользователя
     async function loadPosts() {
@@ -269,13 +272,42 @@ function Profile() {
 
                     <div className="profile-actions">
 
-                        <button className="profile-edit-btn">
-                            Редактировать профиль
-                        </button>
+                    <button
+                        className="profile-edit-btn"
+                        onClick={() => setIsEditModalOpen(true)}
+                    >
+                        Редактировать профиль
+                    </button>
 
-                        <button className="profile-more-btn">
+                    <div className="profile-menu-wrapper">
+                        <button
+                            className="profile-more-btn"
+                            type="button"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenMenu(openMenu === "profile" ? null : "profile");
+                            }}
+                        >
                             •••
                         </button>
+
+                        {openMenu === "profile" && (
+                            <div
+                                className="profile-dropdown"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button
+                                    className="danger-btn"
+                                    onClick={() => {
+                                        setShowDeleteModal(true);
+                                        setOpenMenu(null);
+                                    }}
+                                >
+                                    Удалить аккаунт
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
                     </div>
 
@@ -696,11 +728,56 @@ function Profile() {
 
             ))}
 
-        </section>
-
     </section>
 
-    );
+    <ProfileEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        userData={{
+            name: "Имя Фамилия",
+            username: "@username",
+            bio: "Здесь будет описание профиля",
+            location: "Город",
+            avatar: null
+        }}
+        onSave={(data) => {
+            console.log(data);
+        }}
+    />
+    {showDeleteModal && (
+    <div className="modal-overlay">
+        <div className="modal">
+            <h3>Удалить аккаунт?</h3>
+            <p>Это действие нельзя отменить.</p>
+
+            <div className="modal-actions">
+                <button
+                    className="btn-cancel"
+                    onClick={() => setShowDeleteModal(false)}
+                >
+                    Нет
+                </button>
+
+                <button
+                    className="btn-danger"
+                    onClick={() => {
+                        setShowDeleteModal(false);
+
+                        // пока заглушка 
+                        console.log("DELETE ACCOUNT");
+                    }}
+                >
+                    Да
+                </button>
+            </div>
+        </div>
+    </div>
+)}
+
+</section>
+
+);
+
 
 }
 
