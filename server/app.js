@@ -7,6 +7,7 @@ import fs from "fs";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
 import {isValidEmail, isStrongPassword, isValidPhone} from './validators.js';
+import { stringify } from "querystring";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const PORT = process.env.PORT || 3000;
@@ -22,7 +23,7 @@ app.use(express.json());
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
     
-
+    
     if(!authHeader){
         return res.status(401).json({
             success: false,
@@ -35,7 +36,6 @@ function authMiddleware(req, res, next) {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
-
         next();
         
     } catch (error) {
@@ -248,14 +248,14 @@ app.post("/posts", authMiddleware, (req, res) => {
         title: req.body.title,
         text: req.body.text,
         time: new Date().toISOString(),
-        likes: 0
+        likes: 0,
+        likedBy: []
     };
 
     posts.push(newPost);
 
     fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
-    console.log("USER FROM TOKEN:", req.user);
-    console.log("NEW POST:", newPost);
+
     res.json({
         
         success: true,
@@ -420,7 +420,31 @@ app.post("/posts/:id/like", authMiddleware, (req, res) => {
         })
     };
 
+    if (!post.likedBy) {
+        post.likedBy = [];
+    }
+
+    if(post.likedBy.includes(req.user.id)){
+        post.likes--;
+        console.log("До:", post.likedBy);
+        const index = post.likedBy.indexOf(req.user.id);
+        console.log("id:", req.user.id);
+        console.log("index:", index);
+
+        post.likedBy.splice(index, 1);
+
+        console.log("После:", post.likedBy);
+        fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
+        return res.json({
+            success: true,
+            message: "НЕЕЕЕТ ЗАЧЕМ ТЫ ОТЖАЛ ЛАЙК!!"
+        });
+    };
+
     post.likes++;
+    post.likedBy.push(req.user.id);
+    
+    
 
     fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
     res.json({
