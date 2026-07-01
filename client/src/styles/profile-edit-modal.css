@@ -15,7 +15,7 @@
 }
 
 .modal-edit {
-    background: #fff;
+    background: #fffbf0;
     border-radius: 24px;
     width: 100%;
     max-width: 520px;
@@ -48,7 +48,7 @@
 .modal-header h2 {
     font-size: 22px;
     font-weight: 700;
-    color: var(--text);
+    color: var(--red);
 }
 
 .modal-close-btn {
@@ -127,13 +127,6 @@
     display: none;
 }
 
-.edit-avatar-error {
-    margin-top: 8px;
-    color: #b00020;
-    font-size: 13px;
-    font-weight: 600;
-}
-
 /* ===== ПОЛЯ ===== */
 .edit-fields {
     display: flex;
@@ -175,7 +168,7 @@
 }
 
 .edit-field-group textarea {
-    resize: vertical;
+    resize: none ;
     min-height: 80px;
 }
 

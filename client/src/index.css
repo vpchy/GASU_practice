@@ -15,7 +15,7 @@ html, body, #root {
 
 body {
     font-family: "Segoe UI", Tahoma, sans-serif;
-    background: #efedea;
+    background: #f4efe3;
     color: #2d2d2d;
     transition: background-color 0.5s ease;
 }
@@ -33,7 +33,7 @@ body {
   --text: #2d2d2d;
   --text-light: #888;
 
-  --bg: #efedea;
+  --bg: #fffbf0;
 
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   --radius: 16px;

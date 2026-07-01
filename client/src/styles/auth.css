@@ -12,17 +12,23 @@ body,
 }
 
 .auth-page {
-    min-height: 100vh;
-    width: 100%;
+    position: fixed;
+    inset: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     padding: 24px;
-    background: transparent;
+
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+
+    z-index: 9999;
 }
 
 .container {
-    background: #fcfaf9;
+    background: #fffbf0;
     border-radius: 25px;
     padding: 55px 45px;
     width: min(100%, 520px);

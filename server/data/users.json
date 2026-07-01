@@ -1,2 +1,52 @@
 [
+  {
+    "id": 1,
+    "login": "hello@mail.com",
+    "password": "$2b$10$QtaMRcqc8iwiuTr0UBGv1eNlGOeeOgAhJ0ZtAxmiMzpGWbT20GhYe",
+    "name": "Анастасия Абашева",
+    "username": "anast.abasheva",
+    "bio": "моя мастерская - https://tt-arch.ru",
+    "location": "Санкт-Петербург",
+    "avatar": "http://localhost:3000/uploads/1782912531204-250385.jpg"
+  },
+  {
+    "id": 2,
+    "login": "test@gmail.com",
+    "password": "$2b$10$z7DErYtOKBFw/n/klLUZou1gOKMZ1FJWawDdwI7XaaJDdt6GWsoem",
+    "name": "Екатерина Абдуллаева",
+    "username": "ekat.abdullaeva",
+    "bio": "официальный сайт мастерской\n\nhttps://archinform.ru",
+    "location": "Москва",
+    "avatar": "http://localhost:3000/uploads/1782913142947-482265.jpg"
+  },
+  {
+    "id": 3,
+    "login": "test1@gmail.com",
+    "password": "$2b$10$TuSUhDswvb.bI4B4cWMs/OvpL1cUqZUcVN4bfbMTbDwxuYyTIZ7dW",
+    "name": "Левон Айрапетов",
+    "username": "levon_zavtra_dimon",
+    "bio": "официальный сайт мастерской\n\nhttp://www.paperteam.ru/",
+    "location": "Москва!",
+    "avatar": "http://localhost:3000/uploads/1782913513343-101351.jpg"
+  },
+  {
+    "id": 4,
+    "login": "test2@gmail.com",
+    "password": "$2b$10$pdfYuhqO5ESq4qQGQHmU6uSy7YKHUmdnrbCZWq.W9b1zvOG50LSxq",
+    "name": "Александр Асадов",
+    "username": "asadov.s",
+    "bio": "Родился в 1951 г. в г. Хабаровске\nОкончил Московский Архитектурный институт в 1975 г.\nС 1975 г. по 1987 г. работал в различных проектных организациях г.Москвы\nВ 1989 г. основал Персональную творческую мастерскую при Союзе Архитекторов России\nС 1995 г. руководит Мастерской №19 Управления «Моспроект-2»\nЧлен-корреспондент Международной академии архитектуры\nСоветник Российской Академии Архитектуры и Строительных наук.",
+    "location": "Москва",
+    "avatar": "http://localhost:3000/uploads/1782913935341-371581.jpg"
+  },
+  {
+    "id": 5,
+    "login": "kirill12313@gmail.com",
+    "password": "$2b$10$cIBDntEUZUOE3qD0XZ9cyOPojDJgA4xaONx8XiSr3RqmrJvNZgxrG",
+    "name": "Кирилл Асташов / Admin",
+    "username": "vpchy",
+    "bio": "Разработчик этого сайта.",
+    "location": "Санкт-Петербург",
+    "avatar": "http://localhost:3000/uploads/1782914607715-Thomas_Kelly_photgraph.jpg"
+  }
 ]

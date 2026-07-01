@@ -1,0 +1,68 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 26px;
+    padding: 24px;
+}
+
+.card {
+    background: #fffbf0;
+    border-radius: 18px;
+    border: 1px solid var(--red-border);
+    box-shadow: var(--shadow);
+
+    padding: 18px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.card img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 14px;
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--red);
+}
+
+
+.card p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    display: -webkit-box;
+    overflow: hidden;
+}
+
+.card--quote {
+    background: linear-gradient(135deg, #fffbf0 0%, #fffdf7 100%);
+    border-left: 5px solid var(--red);
+    padding: 22px;
+}
+
+.card--quote h3 {
+    font-size: 18px;
+    margin-left: 16px;
+}
+
+.card--quote p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #444;
+    margin-left: 16px;
+    overflow: visible;
+}

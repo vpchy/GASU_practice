@@ -83,6 +83,9 @@ function authMiddleware(req, res, next) {
 
 }
 
+function getUserDisplayName(user) {
+    return user?.name?.trim() || user?.login || "Неизвестный пользователь";
+}
 
 app.get("/", (req, res) => {
     res.json({ message: "Архитектурный блог API" });
@@ -255,7 +258,7 @@ app.get("/posts", (req, res) => {
 
         for (const user of users) {
             if (user.id === post.authorId) {
-                author = user.login;
+                author = getUserDisplayName(user);
                 break;
             }
         }
@@ -270,7 +273,7 @@ app.get("/posts", (req, res) => {
 
             for (const user of users) {
                 if (user.id === comment.authorId) {
-                    commentAuthor = user.login;
+                    commentAuthor = getUserDisplayName(user);
                     break;
                 }
             }
@@ -280,6 +283,9 @@ app.get("/posts", (req, res) => {
                 author: commentAuthor,
                 text: comment.text,
                 time: comment.time
+                ,
+                attachment: comment.attachment || null,
+                attachmentName: comment.attachmentName || null
             });
         }
         
@@ -354,7 +360,7 @@ app.get("/my-posts", authMiddleware, (req, res) => {
 
         for (const user of users) {
             if (user.id === post.authorId) {
-                author = user.login;
+                author = getUserDisplayName(user);
                 break;
             }
         }
@@ -369,7 +375,7 @@ app.get("/my-posts", authMiddleware, (req, res) => {
 
             for (const user of users) {
                 if (user.id === comment.authorId) {
-                    commentAuthor = user.login;
+                    commentAuthor = getUserDisplayName(user);
                     break;
                 }
             }
@@ -380,6 +386,9 @@ app.get("/my-posts", authMiddleware, (req, res) => {
                 author: commentAuthor,
                 text: comment.text,
                 time: comment.time
+                ,
+                attachment: comment.attachment || null,
+                attachmentName: comment.attachmentName || null
             });
         }
         if (post.authorId !== req.user.id) {
@@ -573,7 +582,8 @@ app.post("/posts/:id/like", authMiddleware, (req, res) => {
         fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
         return res.json({
             success: true,
-            message: "НЕЕЕЕТ ЗАЧЕМ ТЫ ОТЖАЛ ЛАЙК!!"
+            message: "Вы удалили отметку 'Нравится' с этого поста",
+            likes: post.likes
         });
     };
 
@@ -585,7 +595,7 @@ app.post("/posts/:id/like", authMiddleware, (req, res) => {
     fs.writeFileSync("./data/posts.json", JSON.stringify(posts, null, 4));
     res.json({
         success: true,
-        message: "Пост лайкнут",
+        message: "Вы поставили отметку 'Нравится' на этот пост",
         likes: post.likes
     });
 })
@@ -600,11 +610,11 @@ app.get("/posts/:id/comments", (req, res) => {
         
         if (comment.postId !== postId) continue;
 
-        let author = "Неизвестный пользователь";
+        let author = "Неизвестанный пользователь";
 
         for (const user of users) {
             if (user.id === comment.authorId) {
-                author = user.login;
+                author = getUserDisplayName(user);
                 break;
             }
         }
@@ -613,7 +623,9 @@ app.get("/posts/:id/comments", (req, res) => {
             id: comment.id,
             author,
             text: comment.text,
-            time: comment.time
+            time: comment.time,
+            attachment: comment.attachment || null,
+            attachmentName: comment.attachmentName || null
         });
     }
 
@@ -648,6 +660,14 @@ app.post("/posts/:id/comments", authMiddleware, (req, res) => {
         text: req.body.text,
         time: new Date().toISOString()
     };
+
+    // optional attachment fields
+    if ("attachment" in req.body) {
+        newComment.attachment = req.body.attachment || null;
+    }
+    if ("attachmentName" in req.body) {
+        newComment.attachmentName = req.body.attachmentName || null;
+    }
 
     comments.push(newComment);
 

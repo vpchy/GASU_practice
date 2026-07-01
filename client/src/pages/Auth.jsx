@@ -79,7 +79,7 @@ function Auth({ onClose }) {
         <div ref={contentRef}>
           <div className="logo">
           <h1>
-            🏛️Arch<span>Space</span>
+            Arch<span>Space</span>
           </h1>
           <p>Архитектурное пространство</p>
         </div>

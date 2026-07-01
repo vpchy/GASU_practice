@@ -40,6 +40,8 @@ function Main() {
 
     // имя файла для каждого комментария
     const [commentAttachmentNames, setCommentAttachmentNames] = useState({});
+    // файл для каждого комментария
+    const [commentAttachmentFiles, setCommentAttachmentFiles] = useState({});
 
     // текст комментариев
     const [commentText, setCommentText] = useState({});
@@ -228,7 +230,22 @@ function Main() {
 
         try {
 
-            const res = await apiCreateComment(postId, text);
+            // if there's a file attached to this comment, upload it first
+            let attachmentUrl = null;
+            let attachmentName = null;
+
+            const file = commentAttachmentFiles[postId];
+            if (file) {
+                const uploadRes = await uploadFile(file);
+                if (!uploadRes.success) {
+                    showMessage(uploadRes.message || "Ошибка при загрузке файла", "error");
+                    return;
+                }
+                attachmentUrl = uploadRes.file.url;
+                attachmentName = uploadRes.file.originalName;
+            }
+
+            const res = await apiCreateComment(postId, text, attachmentUrl, attachmentName);
 
             if (res.success) {
 
@@ -237,6 +254,10 @@ function Main() {
                     ...prev,
                     [postId]: ""
                 }));
+
+                // очищаем имя и файл прикрепления
+                setCommentAttachmentNames(prev => ({ ...prev, [postId]: "" }));
+                setCommentAttachmentFiles(prev => ({ ...prev, [postId]: null }));
 
                 showMessage(res.message, "success");
                 await loadPosts();
@@ -299,6 +320,11 @@ function Main() {
         setCommentAttachmentNames(prev => ({
             ...prev,
             [postId]: file ? file.name : ""
+        }));
+
+        setCommentAttachmentFiles(prev => ({
+            ...prev,
+            [postId]: file || null
         }));
 
     }
@@ -492,6 +518,7 @@ function Main() {
 
                                         // открываем форму
                                         setShowPostForm(true);
+                                        window.dispatchEvent(new Event("scroll-to-top"));
 
                                         // закрываем меню
                                         setOpenMenu(null);
@@ -573,14 +600,6 @@ function Main() {
                             💬 {post.comments?.length || 0}
                         </button>
 
-
-                        <button
-                            className="action-btn"
-                            type="button"
-                        >
-                            🔄
-                        </button>
-
                     </div>
 
 
@@ -612,6 +631,27 @@ function Main() {
                                         <div className="comment-text">
                                             {comment.text}
                                         </div>
+
+                                        {comment.attachment && (
+                                            <div className="comment-attachment">
+                                                {/\.(png|jpe?g|gif|webp)$/i.test(comment.attachment) ? (
+                                                    <img
+                                                        src={comment.attachment}
+                                                        alt={comment.attachmentName || "Файл"}
+                                                        className="comment-attachment-image"
+                                                    />
+                                                ) : (
+                                                    <a
+                                                        href={comment.attachment}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="attachment-link"
+                                                    >
+                                                        📎 {comment.attachmentName || "Открыть файл"}
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
 
                                         <div className="comment-time">
                                             {new Date(comment.time).toLocaleString("ru-RU")}

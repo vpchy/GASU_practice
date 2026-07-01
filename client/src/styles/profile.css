@@ -26,7 +26,7 @@ body {
 }
 
 .profile {
-    background: var(--card);
+    background: #fffcf6;
     border-radius: var(--radius);
     box-shadow: none;
     overflow: hidden;
@@ -41,12 +41,11 @@ body {
 }
 
 .profile-feed-toolbar {
-    margin-bottom: 12px;
+    margin-bottom: 0px;
 }
 
 .post + .post {
     margin-top: 18px;
-    border-top: 1px solid rgba(0,0,0,0.03);
     padding-top: 18px;
 }
 
@@ -168,7 +167,7 @@ body {
 .profile-tab {
     flex: 1;
     padding: 14px;
-    background: none;
+    background: #fffcf6;
     border: none;
     font-size: 15px;
     font-weight: 600;
@@ -191,7 +190,8 @@ body {
 .feed {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    background: #fffbf0;
+    border-radius: 16px;
 }
 
 .create-post-btn {
@@ -216,7 +216,7 @@ body {
 }
 
 .post {
-    background: #fcfaf9;
+    background: #fffcf6;
     border-radius: var(--radius);
     padding: 24px 24px 16px;
     box-shadow: var(--shadow);
@@ -278,9 +278,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin: 12px 0 24px;
+    margin: 0;
     padding: 20px 24px;
-    background: #ffffff;
+    background: #fffcf6;
     border-radius: var(--radius);
     box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     border: 1px solid rgba(129, 35, 35, 0.06);
@@ -297,6 +297,7 @@ body {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+    margin-bottom: 12px;
 }
 
 .action-btn {
@@ -377,10 +378,6 @@ body {
     font-family: inherit;
 }
 
-/* ===========================
-   FIX: закрепление строки ввода комментариев
-=========================== */
-
 .comment-input {
     position: sticky;
     bottom: 0;
@@ -431,7 +428,7 @@ body {
 }
 
 .modal {
-  background: rgb(255, 248, 248);
+  background: #fffbf0;
   padding: 25px;
   border-radius: 12px;
   width: 320px;
@@ -460,3 +457,37 @@ body {
   cursor: pointer;
 }
 
+.photos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+    padding: 0 8px;
+}
+
+.photo-item {
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 8px;
+    cursor: default;
+    background: var(--bg);
+    transition: transform 0.25s ease;
+}
+
+.photo-item:hover {
+    transform: scale(1.02);
+}
+
+.photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .photos-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+}

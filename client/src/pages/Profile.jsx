@@ -21,6 +21,7 @@ function Profile() {
     const [messageType, setMessageType] = useState("success");
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [user, setUser] = useState(null);
+    const [activeTab, setActiveTab] = useState("posts");
     
     useEffect(() => {
         if (!message) return;
@@ -44,6 +45,8 @@ function Profile() {
 
     // имена файлов комментариев
     const [commentAttachmentNames, setCommentAttachmentNames] = useState({});
+    // файлы комментариев (File objects)
+    const [commentAttachmentFiles, setCommentAttachmentFiles] = useState({});
 
     // поля новой публикации
     const [title, setTitle] = useState("");
@@ -62,6 +65,8 @@ function Profile() {
     const [editingPostId, setEditingPostId] = useState(null);
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const photoPosts = posts.filter(post => /\.(png|jpe?g|gif|webp)$/i.test(post.attachment || ""));
 
     // загрузка всех постов пользователя
     async function loadPosts() {
@@ -232,7 +237,21 @@ function Profile() {
 
         try {
 
-            const res = await apiCreateComment(postId, text);
+            let attachmentUrl = null;
+            let attachmentName = null;
+
+            const file = commentAttachmentFiles[postId];
+            if (file) {
+                const uploadRes = await uploadFile(file);
+                if (!uploadRes.success) {
+                    showMessage(uploadRes.message || "Ошибка при загрузке файла", "error");
+                    return;
+                }
+                attachmentUrl = uploadRes.file.url;
+                attachmentName = uploadRes.file.originalName;
+            }
+
+            const res = await apiCreateComment(postId, text, attachmentUrl, attachmentName);
 
             if (res.success) {
 
@@ -241,6 +260,10 @@ function Profile() {
                     ...prev,
                     [postId]: ""
                 }));
+
+                // очищаем имя и файл прикрепления
+                setCommentAttachmentNames(prev => ({ ...prev, [postId]: "" }));
+                setCommentAttachmentFiles(prev => ({ ...prev, [postId]: null }));
 
                 showMessage(res.message, "success");
                 // обновляем комментарии
@@ -302,6 +325,11 @@ function Profile() {
         setCommentAttachmentNames(prev => ({
             ...prev,
             [postId]: file ? file.name : ""
+        }));
+
+        setCommentAttachmentFiles(prev => ({
+            ...prev,
+            [postId]: file || null
         }));
 
     }
@@ -414,19 +442,23 @@ function Profile() {
 
             <div className="profile-tabs">
 
-                <button className="profile-tab active">
+                <button
+                    className={`profile-tab ${activeTab === "posts" ? "active" : ""}`}
+                    onClick={() => setActiveTab("posts")}
+                >
                     Все записи
                 </button>
 
-                <button className="profile-tab">
+                <button
+                    className={`profile-tab ${activeTab === "photos" ? "active" : ""}`}
+                    onClick={() => setActiveTab("photos")}
+                >
                     Фото
                 </button>
 
-                <button className="profile-tab">
-                    Избранное
-                </button>
-
             </div>
+
+            {activeTab === "posts" && (
 
             <section className="feed profile-feed">
 
@@ -615,6 +647,7 @@ function Profile() {
 
                                         // открываем форму
                                         setShowPostForm(true);
+                                        window.dispatchEvent(new Event("scroll-to-top"));
 
                                         // закрываем меню
                                         setOpenMenu(null);
@@ -730,6 +763,27 @@ function Profile() {
                                         {comment.text}
                                     </div>
 
+                                    {comment.attachment && (
+                                        <div className="comment-attachment">
+                                            {/\.(png|jpe?g|gif|webp)$/i.test(comment.attachment) ? (
+                                                <img
+                                                    src={comment.attachment}
+                                                    alt={comment.attachmentName || "Файл"}
+                                                    className="comment-attachment-image"
+                                                />
+                                            ) : (
+                                                <a
+                                                    href={comment.attachment}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="attachment-link"
+                                                >
+                                                    📎 {comment.attachmentName || "Открыть файл"}
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+
                                     <div className="comment-time">
                                         {new Date(comment.time).toLocaleString("ru-RU")}
                                     </div>
@@ -812,6 +866,56 @@ function Profile() {
             ))}
 
     </section>
+    )}
+    {activeTab === "photos" && (
+
+        <section className="feed profile-feed">
+
+            <div className="profile-feed-toolbar">
+
+                <button
+                    className="create-post-btn"
+                    type="button"
+                    onClick={() => document.getElementById("profile-photo-input")?.click()}
+                >
+                    + Добавить фото
+                </button>
+                <input
+                    id="profile-photo-input"
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={(event) => {
+                        handlePostFileSelect(event);
+                        setShowPostForm(true);
+                        setEditingPostId(null);
+                    }}
+                />
+
+            </div>
+
+            <div className="photos-grid">
+                {photoPosts.length > 0 ? (
+                    photoPosts.map((post) => (
+                        <div key={post.id} className="photo-item">
+                            <img
+                                src={post.attachment}
+                                alt={post.attachmentName || post.title || "Фото"}
+                            />
+                        </div>
+                    ))
+                ) : (
+                    <div className="photo-item" style={{ gridColumn: "1 / -1", cursor: "default" }}>
+                        <div style={{ padding: "20px", textAlign: "center", color: "var(--text-secondary)" }}>
+                            Фотографии не найдены. Загрузите изображение в публикации, чтобы оно появилось здесь.
+                        </div>
+                    </div>
+                )}
+            </div>
+
+        </section>
+
+    )}
 
     <ProfileEditModal
             isOpen={isEditModalOpen}

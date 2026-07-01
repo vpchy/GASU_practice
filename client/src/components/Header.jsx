@@ -15,7 +15,7 @@ function Header({ onOpenAuthModal, onLogout }) {
         notificationRef.current &&
         !notificationRef.current.contains(event.target)
       ) {
-        setShowNotifications(false);
+        setShowNotifications(false );
       }
     }
 
@@ -65,10 +65,9 @@ function Header({ onOpenAuthModal, onLogout }) {
     <header className="header">
       <div className="header-container">
         <Link to="/main" className="logo-link">
-          <span className="logo-icon">🏛️</span>
 
           <div className="logo-text">
-            ArchSpace
+            Arch<span>Space</span>
           </div>
         </Link>
 
