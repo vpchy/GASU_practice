@@ -36,10 +36,11 @@
         "attachment": "http://localhost:3000/uploads/1782913272338-484671.jpg",
         "attachmentName": "484671.jpg",
         "time": "2026-07-01T13:41:12.348Z",
-        "likes": 50105,
+        "likes": 50106,
         "likedBy": [
             24,
-            3
+            3,
+            2
         ]
     },
     {
@@ -63,23 +64,10 @@
         "attachment": "http://localhost:3000/uploads/1782914021669-317270.jpg",
         "attachmentName": "317270.jpg",
         "time": "2026-07-01T13:53:41.679Z",
-        "likes": 2,
+        "likes": 50446,
         "likedBy": [
             4,
             2
-        ]
-    },
-    {
-        "id": 6,
-        "authorId": 5,
-        "title": "Добавили новых функций!",
-        "text": "добавили возможность менять профиль. Пофиксили мелкие баги.",
-        "attachment": null,
-        "attachmentName": null,
-        "time": "2026-07-01T14:17:53.609Z",
-        "likes": 1,
-        "likedBy": [
-            5
         ]
     }
 ]

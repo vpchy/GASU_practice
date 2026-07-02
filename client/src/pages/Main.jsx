@@ -18,9 +18,7 @@ function Main() {
     const [messageType, setMessageType] = useState("success");
 
     // уведомление для пользователя
-    useEffect(() => {
-        if (!message) return;
-
+    useEffect(() => { if (!message) return;
         const timeout = setTimeout(() => {
             setMessage("");
         }, 4500);
@@ -168,8 +166,7 @@ function Main() {
                 console.log("uploadRes", uploadRes);
                 if (!uploadRes.success) {
                     showMessage(uploadRes.message || "Ошибка при загрузке файла", "error");
-                    return;
-                }
+                    return;}
                 attachment = uploadRes.file.url;
                 attachmentName = uploadRes.file.originalName;
             }
@@ -316,15 +313,9 @@ function Main() {
 
         const file = event.target.files?.[0];
 
-        setCommentAttachmentNames(prev => ({
-            ...prev,
-            [postId]: file ? file.name : ""
-        }));
+        setCommentAttachmentNames(prev => ({...prev, [postId]: file ? file.name : ""}));
 
-        setCommentAttachmentFiles(prev => ({
-            ...prev,
-            [postId]: file || null
-        }));
+        setCommentAttachmentFiles(prev => ({...prev,[postId]: file || null}));
 
     }
 
@@ -704,7 +695,7 @@ function Main() {
                                 />
 
                             </div>
-                                                        <button
+                            <button
                                 className="comment-send-btn"
                                 type="button"
                                 onClick={() => sendComment(post.id)}

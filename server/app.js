@@ -3,6 +3,7 @@ dotenv.config({ path: "./config/.env" });
 import express from "express";
 import cors from "cors";
 import fs from "fs";
+import path from "path";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
 import multer from "multer";
@@ -19,10 +20,19 @@ const app = express();
 
 const UPLOAD_DIR = "./uploads";
 
+function decodeFilename(originalName) {
+    if (!originalName) return originalName;
+    try {
+        return Buffer.from(originalName, "latin1").toString("utf8");
+    } catch {
+        return originalName;
+    }
+}
+
 const uploadStorage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-    filename: (req, file, cb) => {
-        const safeName = file.originalname.replace(/[^a-zA-Z0-9\.\-_]/g, "_");
+    destination: (req, file, cb) => cb(null, UPLOAD_DIR), filename: (req, file, cb) => {
+        const originalName = decodeFilename(file.originalname);
+        const safeName = path.basename(originalName).replace(/[<>:"\/\\|?*\x00-\x1F]/g, "_");
         cb(null, `${Date.now()}-${safeName}`);
     }
 });
@@ -97,13 +107,14 @@ app.post("/upload", authMiddleware, upload.single("file"), (req, res) => {
         });
     }
 
-    const url = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    const originalName = decodeFilename(req.file.originalname);
+    const url = `${req.protocol}://${req.get("host")}/uploads/${encodeURIComponent(req.file.filename)}`;
 
     res.json({
         success: true,
         message: "Файл успешно загружен",
         file: {
-            originalName: req.file.originalname,
+            originalName,
             mimeType: req.file.mimetype,
             size: req.file.size,
             url
@@ -658,7 +669,6 @@ app.post("/posts/:id/comments", authMiddleware, (req, res) => {
         time: new Date().toISOString()
     };
 
-    // optional attachment fields
     if ("attachment" in req.body) {
         newComment.attachment = req.body.attachment || null;
     }

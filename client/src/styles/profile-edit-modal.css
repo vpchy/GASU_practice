@@ -34,7 +34,7 @@
     }
 }
 
-/* ===== ЗАГОЛОВОК ===== */
+
 .modal-header {
     display: flex;
     justify-content: space-between;
@@ -67,7 +67,7 @@
     transform: rotate(90deg);
 }
 
-/* ===== АВАТАР ===== */
+
 .edit-avatar-section {
     display: flex;
     align-items: center;
@@ -124,7 +124,7 @@
     display: none;
 }
 
-/* ===== ПОЛЯ ===== */
+
 .edit-fields {
     display: flex;
     flex-direction: column;
@@ -169,7 +169,7 @@
     min-height: 80px;
 }
 
-/* ===== КНОПКИ ===== */
+
 .edit-actions {
     display: flex;
     gap: 12px;
@@ -212,9 +212,7 @@
     box-shadow: 0 8px 25px rgba(129, 35, 35, 0.2);
 }
 
-/* ==========================================
-   АДАПТИВНОСТЬ
-   ========================================== */
+
 @media (max-width: 600px) {
     .modal-edit {
         padding: 24px 20px;
