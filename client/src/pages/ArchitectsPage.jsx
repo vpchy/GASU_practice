@@ -25,7 +25,6 @@ export default function ArchitectsPage() {
 
                 const query = queries[Math.floor(Math.random() * queries.length)];
 
-                // 1. ищем архитекторов
                 const results = await searchArchitects(query);
                 const filtered = (results || []).filter((item) =>
                     /архитектор/i.test(item.title) || /архитектор/i.test(item.snippet)
@@ -34,7 +33,7 @@ export default function ArchitectsPage() {
                 // 2. берём топ-5 страниц, предпочитая страницы про архитекторов
                 const top = (filtered.length ? filtered : results || []).slice(0, 5);
 
-                // 3. получаем детали
+
                 const fullData = await Promise.all(
                     top.map(item => getArchitectSummary(item.title))
                 );

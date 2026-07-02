@@ -63,9 +63,10 @@
         "attachment": "http://localhost:3000/uploads/1782914021669-317270.jpg",
         "attachmentName": "317270.jpg",
         "time": "2026-07-01T13:53:41.679Z",
-        "likes": 1,
+        "likes": 2,
         "likedBy": [
-            4
+            4,
+            2
         ]
     },
     {
@@ -80,16 +81,5 @@
         "likedBy": [
             5
         ]
-    },
-    {
-        "id": 7,
-        "authorId": 2,
-        "title": "dsafsa",
-        "text": "dsafasf",
-        "attachment": "http://localhost:3000/uploads/1782915740404-ÐÑÐ¸Ð¼ÐµÑ Ð¾ÑÑÐµÑÐ° Ð¿Ð¾ Ð¿ÑÐ°ÐºÑÐ¸ÐºÐµ (1).docx",
-        "attachmentName": "ÐÑÐ¸Ð¼ÐµÑ Ð¾ÑÑÐµÑÐ° Ð¿Ð¾ Ð¿ÑÐ°ÐºÑÐ¸ÐºÐµ (1).docx",
-        "time": "2026-07-01T14:22:20.430Z",
-        "likes": 0,
-        "likedBy": []
     }
 ]

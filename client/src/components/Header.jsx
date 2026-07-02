@@ -100,15 +100,15 @@ function Header({ onOpenAuthModal, onLogout }) {
               }`}
             >
               <div className="notification-item">
-                Васильчук прокомментировал вашу публикацию
+                Анна Иванова прокомментировала вашу публикацию
               </div>
 
               <div className="notification-item">
-                Анна Хуевротовна поставила лайк вашей публикации
+                Василий Попов поставил лайк вашей публикации
               </div>
 
               <div className="notification-item">
-                Букунов отказался от вашей группы нахуй
+                Сергей Смирнов поставил лайк вашей публикации
               </div>
             </div>
           </div>

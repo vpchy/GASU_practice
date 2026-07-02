@@ -57,7 +57,7 @@ function Main() {
     const [openComments, setOpenComments] = useState({});
 
 
-    // id поста, который редактируем (null если создаем новый)
+    // id поста, который редактируем, 0 если создаем новый
     const [editingPostId, setEditingPostId] = useState(null);
 
     // загрузка всех публикаций
@@ -230,7 +230,6 @@ function Main() {
 
         try {
 
-            // if there's a file attached to this comment, upload it first
             let attachmentUrl = null;
             let attachmentName = null;
 

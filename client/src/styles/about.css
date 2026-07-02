@@ -1,6 +1,4 @@
-/* ===========================
-   ABOUT PAGE
-=========================== */
+
 :root {
     --red: #812323;
     --red-dark: #ad3030;
@@ -61,10 +59,6 @@ body.about-page {
     padding-left: 4px;
 }
 
-/* ===========================
-   TEAM
-=========================== */
-
 .team-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -123,10 +117,6 @@ body.about-page {
     line-height: 1.5;
     margin: 0;
 }
-
-/* ===========================
-   RESPONSIVE
-=========================== */
 
 @media (max-width: 700px) {
     .about-block {

@@ -81,7 +81,7 @@ function ProfileEditModal({ isOpen, onClose, userData, onSave }) {
         </div> 
         
         <form onSubmit={handleSubmit}> 
-          {/* ===== АВАТАР ===== */} 
+
           <div className="edit-avatar-section"> 
             <div className="edit-avatar-wrapper"> 
               {avatarPreview ? ( 
@@ -97,7 +97,6 @@ function ProfileEditModal({ isOpen, onClose, userData, onSave }) {
           </div> 
           {avatarError && <div className="edit-avatar-error">{avatarError}</div>} 
 
-          {/* ===== ПОЛЯ ВВОДА ===== */} 
           <div className="edit-fields"> 
             <div className="edit-field-group"> 
               <label>Имя и фамилия</label> 
@@ -141,7 +140,6 @@ function ProfileEditModal({ isOpen, onClose, userData, onSave }) {
             </div> 
           </div> 
 
-          {/* ===== КНОПКИ ДЕЙСТВИЯ ===== */} 
           <div className="edit-actions"> 
             <button type="button" className="edit-cancel-btn" onClick={onClose}> 
               Отмена 

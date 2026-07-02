@@ -1,6 +1,5 @@
 import { API_URL, authHeaders } from "./config";
 
-// Accepts optional `attachment` (URL) and `attachmentName`.
 export async function createComment(postId, text, attachment = null, attachmentName = null) {
   const body = { text };
   if (attachment) body.attachment = attachment;

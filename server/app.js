@@ -18,9 +18,6 @@ if (!JWT_SECRET) {
 const app = express();
 
 const UPLOAD_DIR = "./uploads";
-if (!fs.existsSync(UPLOAD_DIR)) {
-    fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
 
 const uploadStorage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, UPLOAD_DIR),
