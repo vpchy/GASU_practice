@@ -51,9 +51,10 @@
         "attachment": "http://localhost:3000/uploads/1782913604751-387476.jpg",
         "attachmentName": "387476.jpg",
         "time": "2026-07-01T13:46:44.759Z",
-        "likes": 6002,
+        "likes": 6003,
         "likedBy": [
-            3
+            3,
+            2
         ]
     },
     {
@@ -64,10 +65,9 @@
         "attachment": "http://localhost:3000/uploads/1782914021669-317270.jpg",
         "attachmentName": "317270.jpg",
         "time": "2026-07-01T13:53:41.679Z",
-        "likes": 50446,
+        "likes": 50445,
         "likedBy": [
-            4,
-            2
+            4
         ]
     }
 ]

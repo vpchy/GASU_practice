@@ -45,7 +45,7 @@ function Layout() {
         onOpenAuthModal={openAuthModal}
         onLogout={logout}
       />
-
+      
       <main className="main-content">
         <aside className="sidebar">
         <Navigation onOpenAuthModal={openAuthModal} />  

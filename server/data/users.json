@@ -48,5 +48,15 @@
     "bio": "Разработчик этого сайта.",
     "location": "Санкт-Петербург",
     "avatar": "http://localhost:3000/uploads/1782914607715-Thomas_Kelly_photgraph.jpg"
+  },
+  {
+    "id": 6,
+    "login": "kom@gmail.com",
+    "password": "$2b$10$GOInVrpee4ShHXrLACdVP.PclzlRQKPwhYdcRmoMYFAICHvXGxucm",
+    "name": "Кирилл Асташов",
+    "username": "username111",
+    "bio": "Здесь будет описание профиля",
+    "location": "Город",
+    "avatar": "http://localhost:3000/uploads/1785607871824-5c2908fdbba0079a97e8ab7f4e0ec3ed.jpg"
   }
 ]
