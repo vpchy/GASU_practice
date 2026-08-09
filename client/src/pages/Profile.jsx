@@ -6,6 +6,7 @@ import {
     getMyPosts as apiGetMyPosts,
     createPost as apiCreatePost,
     createComment as apiCreateComment,
+    getComments as apiGetComments,
     likePost as apiLikePost,
     deletePost as apiDeletePost,
     updatePost as apiUpdatePost
@@ -60,6 +61,7 @@ function Profile() {
 
     // какие комментарии сейчас раскрыты
     const [openComments, setOpenComments] = useState({});
+    const [commentsLoaded, setCommentsLoaded] = useState({});
 
     // id поста, который редактируем (null если создаем новый)
     const [editingPostId, setEditingPostId] = useState(null);
@@ -76,6 +78,24 @@ function Profile() {
         } catch (error) {
             console.error(error);
         }
+    }
+
+    async function loadComments(postId) {
+        try {
+            const data = await apiGetComments(postId);
+            setPosts(prev => prev.map(post => post.id === postId ? { ...post, comments: data, comments_count: data.length } : post));
+            setCommentsLoaded(prev => ({ ...prev, [postId]: true }));
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function toggleComments(postId) {
+        const isOpen = openComments[postId];
+        if (!isOpen && !commentsLoaded[postId]) {
+            await loadComments(postId);
+        }
+        setOpenComments(prev => ({ ...prev, [postId]: !prev[postId] }));
     }
 
     // при открытии страницы сразу получаем посты
@@ -266,8 +286,7 @@ function Profile() {
                 setCommentAttachmentFiles(prev => ({ ...prev, [postId]: null }));
 
                 showMessage(res.message, "success");
-                // обновляем комментарии
-                await loadPosts();
+                await loadComments(postId);
 
             } else {
 
@@ -720,14 +739,9 @@ function Profile() {
                         <button
                             className="action-btn"
                             type="button"
-                            onClick={() =>
-                                setOpenComments(prev => ({
-                                    ...prev,
-                                    [post.id]: !prev[post.id]
-                                }))
-                            }
+                            onClick={() => toggleComments(post.id)}
                         >
-                            💬 {post.comments?.length || 0}
+                            💬 {(post.comments_count ?? post.comments?.length) || 0}
                         </button>
 
                         <button

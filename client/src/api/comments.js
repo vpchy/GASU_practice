@@ -1,5 +1,13 @@
 import { API_URL, authHeaders } from "./config";
 
+export async function getComments(postId) {
+  const res = await fetch(`${API_URL}/posts/${postId}/comments`, {
+    headers: authHeaders(),
+  });
+
+  return res.json();
+}
+
 export async function createComment(postId, text, attachment = null, attachmentName = null) {
   const body = { text };
   if (attachment) body.attachment = attachment;

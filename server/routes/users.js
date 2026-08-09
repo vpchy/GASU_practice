@@ -1,19 +1,22 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/auth.js';
-import { readJson, writeJson } from '../utils/jsonStorage.js';
+import pool from '../db/db.js';
 
 const router = express.Router();
 
-router.get('/me', authMiddleware, (req, res) => {
-  const users = readJson('users.json');
-  const user = users.find(u => u.id === req.user.id);
+router.get('/me', authMiddleware, async (req, res) => {
 
-  if (!user) {
+  const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [req.user.id]);
+
+
+  if (result.rows.length === 0) {
     return res.status(404).json({
       success: false,
       message: 'User not found'
     });
-  }
+  };
+
+  const user = result.rows[0];
 
   const { password, ...safeUser } = user;
 
@@ -23,47 +26,72 @@ router.get('/me', authMiddleware, (req, res) => {
   });
 });
 
-router.put('/me', authMiddleware, (req, res) => {
-  const users = readJson('users.json');
-  const userIndex = users.findIndex(u => u.id === req.user.id);
+router.put('/me', authMiddleware, async (req, res) => {
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [req.user.id]);
 
-  if (userIndex === -1) {
-    return res.status(404).json({
-      success: false,
-      message: 'User not found'
-    });
-  }
-
-  const allowedFields = ['name', 'username', 'bio', 'location', 'avatar'];
-  const user = users[userIndex];
-
-  for (const field of allowedFields) {
-    if (field in req.body) {
-      user[field] = req.body[field];
+    if (result.rows.length === 0) {
+        return res.status(404).json({
+            success: false,
+            message: 'User not found'
+        });
     }
-  }
 
-  writeJson('users.json', users);
-  const { password, ...safeUser } = users[userIndex];
+    const allowedFields = ['name', 'username', 'bio', 'location', 'avatar_url'];
 
-  res.json({
-    success: true,
-    data: safeUser
-  });
+    const updates = [];
+    const values = [];
+
+    for (const field of allowedFields) {
+        if (field in req.body) {
+            updates.push(`${field} = $${values.length + 1}`);
+            values.push(req.body[field]);
+        }
+    }
+
+    if (updates.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'Нет данных для обновления'
+        });
+    }
+
+    values.push(req.user.id);
+
+    const updateResult = await pool.query(
+        `
+        UPDATE users
+        SET ${updates.join(', ')}
+        WHERE id = $${values.length}
+        RETURNING *`,
+        values
+    );
+
+    const { password, ...safeUser } = updateResult.rows[0];
+
+    res.json({
+        success: true,
+        data: safeUser
+    });
 });
 
-router.get('/users/:id', (req, res) => {
-  const users = readJson('users.json');
-  const user = users.find(u => u.id === Number(req.params.id));
+router.get('/users/:id', async (req, res) => {
+  const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [req.params.id]);
 
-  if (!user) {
-    return res.json({
-      success: false,
-      message: 'Пользователь не найден'
+  if (result.rows.length === 0) {
+    return res.status(404).json({
+        success: false,
+        message: "Пользователь не найден"
     });
   }
 
-  res.json(user);
+  const user = result.rows[0];
+
+  const { password, ...safeUser } = user;
+
+  res.json({
+      success: true,
+      data: safeUser
+  });
 });
 
 export default router;
