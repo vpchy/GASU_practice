@@ -1,5 +1,5 @@
 import express from 'express';
-import { authMiddleware, getUserDisplayName } from '../middleware/auth.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 import pool from '../db/db.js';
 
@@ -184,6 +184,31 @@ router.put('/posts/:id', authMiddleware, async (req, res) => {
             success: false,
             message: 'Вы не можете редактировать чужой пост'
         });
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, 'attachment')) {
+        await pool.query(`DELETE FROM post_media WHERE post_id = $1`, [req.params.id]);
+
+        const attachmentUrl = req.body.attachment;
+        if (attachmentUrl) {
+            await pool.query(
+                `
+                INSERT INTO post_media(
+                    post_id,
+                    media_type,
+                    file_name,
+                    file_url
+                )
+                VALUES ($1, $2, $3, $4)
+                `,
+                [
+                    req.params.id,
+                    req.body.mimeType || 'application/octet-stream',
+                    req.body.attachmentName || null,
+                    attachmentUrl
+                ]
+            );
+        }
     }
 
     await pool.query(

@@ -28,8 +28,4 @@ export function authMiddleware(req, res, next) {
       message: 'Недействительный токен'
     });
   }
-}
-
-export function getUserDisplayName(user) {
-  return user?.name?.trim() || user?.login || 'Неизвестный пользователь';
-}
+};
