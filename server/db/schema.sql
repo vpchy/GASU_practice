@@ -30,6 +30,20 @@ CREATE TABLE post_media (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE comment_media (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    comment_id INTEGER NOT NULL
+        REFERENCES comments(id)
+        ON DELETE CASCADE,
+    media_type TEXT NOT NULL,
+    file_name TEXT,
+    file_url TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_comment_media_comment_id
+ON comment_media(comment_id);
+
 CREATE TABLE comments (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,

@@ -4,6 +4,14 @@ import pool from '../db/db.js';
 
 const router = express.Router();
 
+function mapUser(user) {
+  const { password, avatar_url, ...safeUser } = user;
+  return {
+    ...safeUser,
+    avatar: avatar_url || null,
+  };
+}
+
 router.get('/me', authMiddleware, async (req, res) => {
 
   const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [req.user.id]);
@@ -16,13 +24,11 @@ router.get('/me', authMiddleware, async (req, res) => {
     });
   };
 
-  const user = result.rows[0];
-
-  const { password, ...safeUser } = user;
+  const user = mapUser(result.rows[0]);
 
   res.json({
     success: true,
-    data: safeUser
+    data: user
   });
 });
 
@@ -36,16 +42,22 @@ router.put('/me', authMiddleware, async (req, res) => {
         });
     }
 
-    const allowedFields = ['name', 'username', 'bio', 'location', 'avatar_url'];
-
     const updates = [];
     const values = [];
+    const fieldMap = {
+        avatar: 'avatar_url',
+        avatar_url: 'avatar_url'
+    };
+    const allowedFields = ['name', 'username', 'bio', 'location', 'avatar', 'avatar_url'];
 
     for (const field of allowedFields) {
-        if (field in req.body) {
-            updates.push(`${field} = $${values.length + 1}`);
-            values.push(req.body[field]);
-        }
+        if (!(field in req.body)) continue;
+
+        const dbField = fieldMap[field] || field;
+        if (updates.some((update) => update.startsWith(`${dbField} =`))) continue;
+
+        updates.push(`${dbField} = $${values.length + 1}`);
+        values.push(req.body[field]);
     }
 
     if (updates.length === 0) {
@@ -66,11 +78,11 @@ router.put('/me', authMiddleware, async (req, res) => {
         values
     );
 
-    const { password, ...safeUser } = updateResult.rows[0];
+    const user = mapUser(updateResult.rows[0]);
 
     res.json({
         success: true,
-        data: safeUser
+        data: user
     });
 });
 
@@ -84,13 +96,11 @@ router.get('/users/:id', async (req, res) => {
     });
   }
 
-  const user = result.rows[0];
-
-  const { password, ...safeUser } = user;
+  const user = mapUser(result.rows[0]);
 
   res.json({
       success: true,
-      data: safeUser
+      data: user
   });
 });
 

@@ -39,6 +39,19 @@ function Profile() {
         setMessageType(type);
     }
 
+    function getFirstAttachment(item) {
+        if (item?.attachments?.length) {
+            return item.attachments[0];
+        }
+        if (item?.attachment) {
+            return {
+                url: item.attachment,
+                fileName: item.attachmentName
+            };
+        }
+        return null;
+    }
+
     // имя прикрепленного файла к публикации
     const [postAttachmentName, setPostAttachmentName] = useState("");
     const [postAttachmentFile, setPostAttachmentFile] = useState(null);
@@ -68,7 +81,10 @@ function Profile() {
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const photoPosts = posts.filter(post => /\.(png|jpe?g|gif|webp)$/i.test(post.attachment || ""));
+    const photoPosts = posts.filter(post => {
+        const attachment = getFirstAttachment(post);
+        return !!attachment && /\.(png|jpe?g|gif|webp)$/i.test(attachment.url);
+    });
 
     // загрузка всех постов пользователя
     async function loadPosts() {
@@ -700,26 +716,30 @@ function Profile() {
 
                         <p>{post.text}</p>
 
-                        {post.attachment && (
-                            <div className="post-attachment">
-                                {/\.(png|jpe?g|gif|webp)$/i.test(post.attachment) ? (
-                                    <img
-                                        src={post.attachment}
-                                        alt={post.attachmentName || "Файл"}
-                                        className="post-attachment-image"
-                                    />
-                                ) : (
-                                    <a
-                                        href={post.attachment}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="attachment-link"
-                                    >
-                                        📎 {post.attachmentName || "Открыть файл"}
-                                    </a>
-                                )}
-                            </div>
-                        )}
+                        {(() => {
+                            const attachment = getFirstAttachment(post);
+                            if (!attachment) return null;
+                            return (
+                                <div className="post-attachment">
+                                    {/\.(png|jpe?g|gif|webp)$/i.test(attachment.url) ? (
+                                        <img
+                                            src={attachment.url}
+                                            alt={attachment.fileName || "Файл"}
+                                            className="post-attachment-image"
+                                        />
+                                    ) : (
+                                        <a
+                                            href={attachment.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="attachment-link"
+                                        >
+                                            📎 {attachment.fileName || "Открыть файл"}
+                                        </a>
+                                    )}
+                                </div>
+                            );
+                        })()}
 
                     </div>
 
@@ -777,26 +797,30 @@ function Profile() {
                                         {comment.text}
                                     </div>
 
-                                    {comment.attachment && (
-                                        <div className="comment-attachment">
-                                            {/\.(png|jpe?g|gif|webp)$/i.test(comment.attachment) ? (
-                                                <img
-                                                    src={comment.attachment}
-                                                    alt={comment.attachmentName || "Файл"}
-                                                    className="comment-attachment-image"
-                                                />
-                                            ) : (
-                                                <a
-                                                    href={comment.attachment}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="attachment-link"
-                                                >
-                                                    📎 {comment.attachmentName || "Открыть файл"}
-                                                </a>
-                                            )}
-                                        </div>
-                                    )}
+                                    {(() => {
+                                        const attachment = getFirstAttachment(comment);
+                                        if (!attachment) return null;
+                                        return (
+                                            <div className="comment-attachment">
+                                                {/\.(png|jpe?g|gif|webp)$/i.test(attachment.url) ? (
+                                                    <img
+                                                        src={attachment.url}
+                                                        alt={attachment.fileName || "Файл"}
+                                                        className="comment-attachment-image"
+                                                    />
+                                                ) : (
+                                                    <a
+                                                        href={attachment.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="attachment-link"
+                                                    >
+                                                        📎 {attachment.fileName || "Открыть файл"}
+                                                    </a>
+                                                )}
+                                            </div>
+                                        );
+                                    })()}
 
                                     <div className="comment-time">
                                         {new Date(comment.time).toLocaleString("ru-RU")}
@@ -910,14 +934,17 @@ function Profile() {
 
             <div className="photos-grid">
                 {photoPosts.length > 0 ? (
-                    photoPosts.map((post) => (
-                        <div key={post.id} className="photo-item">
-                            <img
-                                src={post.attachment}
-                                alt={post.attachmentName || post.title || "Фото"}
-                            />
-                        </div>
-                    ))
+                    photoPosts.map((post) => {
+                        const attachment = getFirstAttachment(post);
+                        return (
+                            <div key={post.id} className="photo-item">
+                                <img
+                                    src={attachment?.url}
+                                    alt={attachment?.fileName || post.title || "Фото"}
+                                />
+                            </div>
+                        );
+                    })
                 ) : (
                     <div className="photo-item" style={{ gridColumn: "1 / -1", cursor: "default" }}>
                         <div style={{ padding: "20px", textAlign: "center", color: "var(--text-secondary)" }}>

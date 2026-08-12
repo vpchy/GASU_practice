@@ -5,6 +5,7 @@ import Main from "./pages/Main.jsx";
 import Profile from "./pages/Profile.jsx";
 import About from "./pages/About.jsx";
 import ArchitectsPage from "./pages/ArchitectsPage.jsx";
+import "./styles/main.css";
 
 function App() {
   return (

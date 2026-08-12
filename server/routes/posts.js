@@ -1,6 +1,6 @@
 import express from 'express';
 import { authMiddleware, getUserDisplayName } from '../middleware/auth.js';
-import { readJson, writeJson } from '../utils/jsonStorage.js';
+
 import pool from '../db/db.js';
 
 const router = express.Router();
@@ -14,10 +14,20 @@ router.get('/posts', async (req, res) => {
             p.created_at AS time,
             COALESCE(NULLIF(u.name, ''), u.username) AS author,
             COALESCE(l.likes, 0) AS likes,
-            COALESCE(c.comments_count, 0) AS comments_count
+            COALESCE(c.comments_count, 0) AS comments_count,
+            COALESCE(json_agg(
+                json_build_object(
+                    'id', pm.id,
+                    'mimeType', pm.media_type,
+                    'fileName', pm.file_name,
+                    'url', pm.file_url
+                ) ORDER BY pm.created_at
+            ) FILTER (WHERE pm.id IS NOT NULL), '[]'::json) AS attachments
         FROM posts p
         LEFT JOIN users u
-        ON u.id = p.author_id
+            ON u.id = p.author_id
+        LEFT JOIN post_media pm
+            ON pm.post_id = p.id
         LEFT JOIN (
             SELECT post_id, COUNT(*) AS likes
             FROM likes
@@ -28,58 +38,76 @@ router.get('/posts', async (req, res) => {
             FROM comments
             GROUP BY post_id
         ) c ON c.post_id = p.id
+        GROUP BY p.id, u.id, l.likes, c.comments_count
         ORDER BY p.created_at DESC`);
 
-
-    /*  const result = posts.map(post => {
-        const author = users.find(user => user.id === post.authorId);
-        const postComments = comments
-        .filter(comment => comment.postId === post.id)
-        .map(comment => {
-            const commentAuthor = users.find(user => user.id === comment.authorId);
-            return {
-            id: comment.id,
-            author: getUserDisplayName(commentAuthor),
-            text: comment.text,
-            time: comment.time,
-            attachment: comment.attachment || null,
-            attachmentName: comment.attachmentName || null
-            };
-        });
-
-        return {
-        id: post.id,
-        author: getUserDisplayName(author),
-        title: post.title,
-        text: post.text,
-        time: post.time,
-        likes: post.likes,
-        attachment: post.attachment || null,
-        attachmentName: post.attachmentName || null,
-        comments: postComments
-        };
-    });*/
     res.json(result.rows);
 });
 
 router.post('/posts', authMiddleware, async (req, res) => {
     if (!req.body.title || !req.body.text) {
         return res.json({
-        success: false,
-        message: 'Введите заголовок и текст'
+            success: false,
+            message: 'Введите заголовок и текст'
         });
     }
-    const result = await pool.query(`
+
+    const result = await pool.query(
+        `
         INSERT INTO posts(author_id, title, text)
-        VALUES($1, $2, $3)
-        RETURNING *`,
-        [req.user.id, req.body.title, req.body.text]
+        VALUES ($1, $2, $3)
+        RETURNING id, title, text, created_at
+        `,
+        [
+            req.user.id,
+            req.body.title,
+            req.body.text
+        ]
     );
+
+    const post = result.rows[0];
+    let attachments = null;
+
+    if (req.body.attachment) {
+        const mediaResult = await pool.query(
+            `
+            INSERT INTO post_media(
+                post_id,
+                media_type,
+                file_name,
+                file_url
+            )
+            VALUES ($1, $2, $3, $4)
+            RETURNING id, media_type, file_name, file_url
+            `,
+            [
+                post.id,
+                req.body.mimeType || 'application/octet-stream',
+                req.body.attachmentName || null,
+                req.body.attachment
+            ]
+        );
+        attachments = mediaResult.rows.map(m => ({
+            id: m.id,
+            mimeType: m.media_type,
+            fileName: m.file_name,
+            url: m.file_url
+        }));
+    }
 
     res.json({
         success: true,
         message: 'Пост отправлен',
-        post: result.rows[0]
+        post: {
+            id: post.id,
+            title: post.title,
+            text: post.text,
+            time: post.created_at,
+            author: req.user.username,
+            likes: 0,
+            comments_count: 0,
+            attachments: attachments || []
+        }
     });
 });
 
@@ -93,10 +121,20 @@ router.get('/my-posts', authMiddleware, async (req, res) => {
             p.created_at AS time,
             COALESCE(NULLIF(u.name, ''), u.username) AS author,
             COALESCE(l.likes, 0) AS likes,
-            COALESCE(c.comments_count, 0) AS comments_count
+            COALESCE(c.comments_count, 0) AS comments_count,
+            COALESCE(json_agg(
+                json_build_object(
+                    'id', pm.id,
+                    'mimeType', pm.media_type,
+                    'fileName', pm.file_name,
+                    'url', pm.file_url
+                ) ORDER BY pm.created_at
+            ) FILTER (WHERE pm.id IS NOT NULL), '[]'::json) AS attachments
         FROM posts p
         LEFT JOIN users u
             ON u.id = p.author_id
+        LEFT JOIN post_media pm
+            ON pm.post_id = p.id
         LEFT JOIN (
             SELECT post_id, COUNT(*) AS likes
             FROM likes
@@ -108,6 +146,7 @@ router.get('/my-posts', authMiddleware, async (req, res) => {
             GROUP BY post_id
         ) c ON c.post_id = p.id
         WHERE p.author_id = $1
+        GROUP BY p.id, u.id, l.likes, c.comments_count
         ORDER BY p.created_at DESC;`,
             [req.user.id]
         );
@@ -157,15 +196,6 @@ router.put('/posts/:id', authMiddleware, async (req, res) => {
         `,
         [req.body.title, req.body.text, req.params.id]
     )
-/*
-    if ('attachment' in req.body) {
-        post.attachment = req.body.attachment || null;
-    }
-    if ('attachmentName' in req.body) {
-        post.attachmentName = req.body.attachmentName || null;
-    }
-*/
-
 
     res.json({
         success: true,
@@ -182,7 +212,6 @@ router.delete('/posts/:id/del', authMiddleware, async (req, res) => {
         `,
         [req.params.id]
     );
-    const postId = Number(req.params.id);
 
     if (result.rows.length === 0) {
         return res.json({
@@ -268,11 +297,22 @@ router.get('/posts/:id/comments', async (req, res) => {
             c.id,
             c.text,
             c.created_at AS time,
-            COALESCE(NULLIF(u.name, ''), u.username) AS author
+            COALESCE(NULLIF(u.name, ''), u.username) AS author,
+            COALESCE(json_agg(
+                json_build_object(
+                    'id', cm.id,
+                    'mimeType', cm.media_type,
+                    'fileName', cm.file_name,
+                    'url', cm.file_url
+                ) ORDER BY cm.created_at
+            ) FILTER (WHERE cm.id IS NOT NULL), '[]'::json) AS attachments
         FROM comments c
         LEFT JOIN users u
             ON u.id = c.author_id
+        LEFT JOIN comment_media cm
+            ON cm.comment_id = c.id
         WHERE c.post_id = $1
+        GROUP BY c.id, u.id
         ORDER BY c.created_at
         `,
         [req.params.id]
@@ -304,25 +344,58 @@ router.post('/posts/:id/comments', authMiddleware, async (req, res) => {
         });
     }
 
-    await pool.query(
-    `
-    INSERT INTO comments(post_id, author_id, text)
-    VALUES ($1, $2, $3)
-    `,
-    [req.params.id, req.user.id, req.body.text.trim()]
-    );
+    const commentInsert = await pool.query(
+        `
+        INSERT INTO comments(post_id, author_id, text)
+        VALUES ($1, $2, $3)
+        RETURNING id, text, created_at, author_id
+        `,
+        [
+            req.params.id,
+            req.user.id,
+            req.body.text.trim()
+        ]
+        );
+    const comment = commentInsert.rows[0];
+    let attachments = null;
 
-/*
-    if ('attachment' in req.body) {
-        newComment.attachment = req.body.attachment || null;
+    if (req.body.attachment) {
+        const mediaResult = await pool.query(
+            `
+            INSERT INTO comment_media(
+                comment_id,
+                media_type,
+                file_name,
+                file_url
+            )
+            VALUES ($1, $2, $3, $4)
+            RETURNING id, media_type, file_name, file_url
+            `,
+            [
+                comment.id,
+                req.body.mimeType || 'application/octet-stream',
+                req.body.attachmentName || null,
+                req.body.attachment
+            ]
+            );
+        attachments = mediaResult.rows.map(m => ({
+            id: m.id,
+            mimeType: m.media_type,
+            fileName: m.file_name,
+            url: m.file_url
+        }));
     }
-    if ('attachmentName' in req.body) {
-        newComment.attachmentName = req.body.attachmentName || null;
-    }
-*/
+
     res.json({
         success: true,
-        message: 'Комментарий добавлен'
+        message: 'Комментарий добавлен',
+        comment: {
+            id: comment.id,
+            text: comment.text,
+            time: comment.created_at,
+            author: req.user.username,
+            attachments: attachments || []
+        }
     });
 });
 

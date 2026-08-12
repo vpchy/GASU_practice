@@ -32,6 +32,19 @@ function Main() {
         setMessageType(type);
     }
 
+    function getFirstAttachment(item) {
+        if (item?.attachments?.length) {
+            return item.attachments[0];
+        }
+        if (item?.attachment) {
+            return {
+                url: item.attachment,
+                fileName: item.attachmentName
+            };
+        }
+        return null;
+    }
+
     // имя прикрепленного файла к публикации
     const [postAttachmentName, setPostAttachmentName] = useState("");
     const [postAttachmentFile, setPostAttachmentFile] = useState(null);
@@ -562,26 +575,30 @@ function Main() {
 
                         <p>{post.text}</p>
 
-                        {post.attachment && (
-                            <div className="post-attachment">
-                                {/\.(png|jpe?g|gif|webp)$/i.test(post.attachment) ? (
-                                    <img
-                                        src={post.attachment}
-                                        alt={post.attachmentName || "Файл"}
-                                        className="post-attachment-image"
-                                    />
-                                ) : (
-                                    <a
-                                        href={post.attachment}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="attachment-link"
-                                    >
-                                        📎 {post.attachmentName || "Открыть файл"}
-                                    </a>
-                                )}
-                            </div>
-                        )}
+                        {(() => {
+                            const attachment = getFirstAttachment(post);
+                            if (!attachment) return null;
+                            return (
+                                <div className="post-attachment">
+                                    {/\.(png|jpe?g|gif|webp)$/i.test(attachment.url) ? (
+                                        <img
+                                            src={attachment.url}
+                                            alt={attachment.fileName || "Файл"}
+                                            className="post-attachment-image"
+                                        />
+                                    ) : (
+                                        <a
+                                            href={attachment.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="attachment-link"
+                                        >
+                                            📎 {attachment.fileName || "Открыть файл"}
+                                        </a>
+                                    )}
+                                </div>
+                            );
+                        })()}
 
                     </div>
                                         {/* кнопки действий */}
@@ -637,26 +654,30 @@ function Main() {
                                             {comment.text}
                                         </div>
 
-                                        {comment.attachment && (
-                                            <div className="comment-attachment">
-                                                {/\.(png|jpe?g|gif|webp)$/i.test(comment.attachment) ? (
-                                                    <img
-                                                        src={comment.attachment}
-                                                        alt={comment.attachmentName || "Файл"}
-                                                        className="comment-attachment-image"
-                                                    />
-                                                ) : (
-                                                    <a
-                                                        href={comment.attachment}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="attachment-link"
-                                                    >
-                                                        📎 {comment.attachmentName || "Открыть файл"}
-                                                    </a>
-                                                )}
-                                            </div>
-                                        )}
+                                        {(() => {
+                                            const attachment = getFirstAttachment(comment);
+                                            if (!attachment) return null;
+                                            return (
+                                                <div className="comment-attachment">
+                                                    {/\.(png|jpe?g|gif|webp)$/i.test(attachment.url) ? (
+                                                        <img
+                                                            src={attachment.url}
+                                                            alt={attachment.fileName || "Файл"}
+                                                            className="comment-attachment-image"
+                                                        />
+                                                    ) : (
+                                                        <a
+                                                            href={attachment.url}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="attachment-link"
+                                                        >
+                                                            📎 {attachment.fileName || "Открыть файл"}
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
 
                                         <div className="comment-time">
                                             {new Date(comment.time).toLocaleString("ru-RU")}
